@@ -151,7 +151,7 @@ const HeaderDirector = () => {
       </nav>
 
       {/* Contenido Principal */}
-      <main className="flex-grow  p-5 md:mt-16">
+      <main className="flex-grow  p-5 md:mt-20">
         <Outlet />
       </main>
     </div>
