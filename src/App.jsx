@@ -21,6 +21,7 @@ import EditSemester from './pages/director/semester/EditSemester'
 import ProfileDirector from './pages/director/ProfileDirector'
 import UpdateProfile from './pages/director/UpdateProfile'
 import DirectorView from './pages/director/DirectorView'
+import AssignTeacher from './pages/director/AssignTeacher'
 
 //Profesor
 import HeaderTeacher from './components/header/HeaderTeacher'
@@ -55,6 +56,7 @@ function App() {
           //Rutas del director
               <Route path='director' element={<HeaderDirector />} >
                 <Route index element={<DirectorView />} />
+                <Route path='assign-teacher' element={<AssignTeacher />} />
                 <Route path='create-user' element={<CreateUser />} />
                 <Route path='list-director' element={<ListDirector />} />
                 <Route path='list-teacher' element={<ListTeacher />} />

@@ -1,65 +1,87 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import ErrorAlert from '../components/alerts/ErrorAlert'
-import SuccessAlert from '../components/alerts/SuccessAlert'
-
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UpdatePassword = () => {
+    const navigate = useNavigate();
+    const [passwords, setPasswords] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
 
-    const [ErrorAlert, setErrorAlert] = useState({ error: false, message: "", });
-    const [SuccessAlert, setSuccessAlert] = useState({ error: false, message: "", });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-
+    const handleChange = (e) => {
+        setPasswords({ ...passwords, [e.target.name]: e.target.value });
     };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (passwords.newPassword !== passwords.confirmPassword) {
+            alert("Las contraseñas nuevas no coinciden");
+            return;
+        }
+        console.log("Contraseña actualizada");
+        navigate(-1);
+    };
+
     return (
-        <>
-            <div className="py-5">
-                <div className=" xl:mx-96 lg:mx-60 md:mx-40 sm:mx-20 my-10 bg-white shadow rounded-lg p-10 border-2 border-red-700 shadow-lg shadow-red-400 ">
-                    <form onSubmit={handleSubmit}>
-                        <h1 className=" font-bold text-2xl text-center text-gray-900 dark:text-red-500 ">
-                            RECUPERAR CONTRASEÑA
-                        </h1>
-                        {ErrorAlert.error && !SuccessAlert.error && (
-                            <ErrorAlert message={ErrorAlert.message} />
-                        )}
-                        {SuccessAlert.error && (
-                            <SuccessAlert message={SuccessAlert.message} />
-                        )}
-
-                        <div className="my-5">
-                            <label
-                                className="uppercase text-gray-600 block  font-bold"
-                                htmlFor="email"
-                                name="email"
-                                type="email"
-                            >
-                                Email
-                            </label>
-
-                            <input
-                                id="email"
-                                type="email"
-                                placeholder="Email"
-                                className="w-full mt-3 p-3 border rounded-xl bg-gray-50"
-
-                            />
-                        </div>
-
+        <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md md:p-8 lg:max-w-2xl">
+            <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
+                Cambiar Contraseña
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 gap-4">
+                    <div>
+                        <label className="block text-gray-700">Contraseña Actual</label>
                         <input
-                            type="submit"
-                            value="enviar"
-                            className="bg-red-500 mb-5 w-full py-2 text-white uppercase font-bold rounded hover:cursor-pointer hover:bg-sky-800 transition-colors"
+                            type="password"
+                            name="currentPassword"
+                            value={passwords.currentPassword}
+                            onChange={handleChange}
+                            className="border p-3 w-full rounded-md border-gray-300"
                         />
-                    </form>
-                    <Link to="/">Volver a inicio</Link>
-                </div>
-            </div>
-        </>
-    )
-}
+                    </div>
 
-export default UpdatePassword
+                    <div>
+                        <label className="block text-gray-700">Nueva Contraseña</label>
+                        <input
+                            type="password"
+                            name="newPassword"
+                            value={passwords.newPassword}
+                            onChange={handleChange}
+                            className="border p-3 w-full rounded-md border-gray-300"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-gray-700">Repetir Contraseña</label>
+                        <input
+                            type="password"
+                            name="confirmPassword"
+                            value={passwords.confirmPassword}
+                            onChange={handleChange}
+                            className="border p-3 w-full rounded-md border-gray-300"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/director")}
+                        className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700"
+                    >
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
+
+export default UpdatePassword;

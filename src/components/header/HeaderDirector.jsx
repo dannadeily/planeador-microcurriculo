@@ -59,8 +59,8 @@ const HeaderDirector = () => {
             {isUserMenuOpen && (
               <ul className="absolute right-0 mt-2 w-40 bg-white text-black rounded-md shadow-lg overflow-hidden">
                 <li className="border-b border-gray-300 last:border-none">
-                  <Link to="profile-director" className="block px-4 py-2 hover:bg-gray-200">
-                    Ver Perfil
+                  <Link to="Profile-director" className="block px-4 py-2 hover:bg-gray-200">
+                    Perfil
                   </Link>
                 </li>
 
