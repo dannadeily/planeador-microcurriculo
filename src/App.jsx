@@ -25,6 +25,7 @@ import AssignTeacher from './pages/director/AssignTeacher'
 
 //Profesor
 import HeaderTeacher from './components/header/HeaderTeacher'
+import TeacherView from './pages/teacher/TeacherView'
 
 //Footer
 import Footer from './components/footer/Footer'
@@ -34,6 +35,7 @@ import UpdatePassword from './pages/UpdatePassword'
 
 //Estilos
 import './App.css'
+
 
 
 
@@ -74,8 +76,8 @@ function App() {
 
 
           //Rutas del profesor
-              <Route>
-                <Route path='teacher' element={<HeaderTeacher />} />
+              <Route path='teacher' element={<HeaderTeacher />}>
+                <Route index element={<TeacherView />} />
 
               </Route>
 
