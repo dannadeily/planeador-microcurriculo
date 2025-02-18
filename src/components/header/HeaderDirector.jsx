@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
+
 import { FaBars, FaUser, FaTimes, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaBookOpen } from "react-icons/fa";
 import { FaHouseChimney } from "react-icons/fa6";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 
+import Axios from "../../axios/Axios";
+
 const HeaderDirector = () => {
+  // Semestre activo
+  const [activeSemester, setActiveSemester] = useState({ id: "", name: "", startDate: "", endDate: "" });
+
+  // Header
   const [activeMenu, setActiveMenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -42,11 +49,33 @@ const HeaderDirector = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const getActiveSemester = async () => {
+      try {
+        const response = await Axios.get("semester/active");
+        const { id, name, startDate, endDate } = response.data;  // Desestructuración de la respuesta
+
+        console.log(id); // Verifica que obtienes el id correctamente
+        setActiveSemester({
+          id,
+          name,
+          startDate,
+          endDate
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getActiveSemester();
+  }, []); 
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header className="bg-red-500 p-5 fixed top-0 left-0 w-full z-50 flex justify-between items-center">
-        <h1 className="text-white font-bold text-lg">Semestre # fecha inicio fecha fin</h1>
+        <h1 className="text-white font-bold text-lg">  
+          {activeSemester.name ? `Semestre Activo:  ${activeSemester.name} Fecha Inicio: ${activeSemester.startDate} - Fecha Fin: ${activeSemester.endDate}` : "No Hay Semestre Activo"}
+        </h1>
 
         <div className="flex items-center space-x-4">
           {/* Icono de usuario con submenú */}
@@ -97,7 +126,6 @@ const HeaderDirector = () => {
             </Link>
           </li>
           {[
-
             {
               key: "opcion1",
               icon: <FaUser className="mr-2" />,
@@ -151,7 +179,7 @@ const HeaderDirector = () => {
       </nav>
 
       {/* Contenido Principal */}
-      <main className="flex-grow  p-5 md:mt-20">
+      <main className="flex-grow p-5 md:mt-20">
         <Outlet />
       </main>
     </div>
