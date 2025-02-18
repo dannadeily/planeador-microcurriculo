@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../axios/Axios';
 
-const Profile = () => {
+const ProfileDirector = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
     name: '',
@@ -55,4 +55,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfileDirector;

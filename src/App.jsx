@@ -13,20 +13,22 @@ import Login from './pages/Login'
 import CreateUser from './pages/director/user/CreateUser'
 import ListDirector from './pages/director/user/ListDirector'
 import ListTeacher from './pages/director/user/ListTeacher'
-import EditUser from './pages/director/user/EditUser'
 import CreateCourse from './pages/director/course/CreateCourse'
 import ListCourse from './pages/director/course/ListCourse'
 import EditCourse from './pages/director/course/EditCourse'
 import CreateSemester from './pages/director/semester/CreateSemester'
 import ListSemester from './pages/director/semester/ListSemester'
 import EditSemester from './pages/director/semester/EditSemester'
-
+import ProfileDirector from './pages/director/ProfileDirector';
+import UpdateProfileDirector from './pages/director/UpdateProfileDirector';
 import DirectorView from './pages/director/DirectorView'
 import AssignTeacher from './pages/director/AssignTeacher'
 
 //Profesor
 
 import TeacherView from './pages/teacher/TeacherView'
+import UpdateProfileTeacher from './pages/teacher/UpdateProfileTeacher';
+import ProfileTeacher from './pages/teacher/ProfilerTeacher';
 
 
 
@@ -39,12 +41,14 @@ import PrivateRouteTeacher from './layout/privateRouteTeacher'
 import Footer from './components/footer/Footer'
 
 //para director y profesor
-import Profile from './pages/user/Profile'
-import UpdateProfile from './pages/user/UpdateProfile'
+
 import UpdatePassword from './pages/user/UpdatePassword'
 
 //Estilos
 import './App.css'
+
+
+
 
 
 
@@ -81,23 +85,25 @@ function App() {
                   <Route path='create-user' element={<CreateUser />} />
                   <Route path='list-director' element={<ListDirector />} />
                   <Route path='list-teacher' element={<ListTeacher />} />
-                  <Route path='edit-user/:id' element={<EditUser />} />
                   <Route path='create-course' element={<CreateCourse />} />
                   <Route path='list-course' element={<ListCourse />} />
                   <Route path='edit-course/:id' element={<EditCourse />} />
                   <Route path='create-semester' element={<CreateSemester />} />
                   <Route path='list-semester' element={<ListSemester />} />
                   <Route path='edit-semester/:id' element={<EditSemester />} />
-                  <Route path='profile-director' element={<Profile />} />
+                  <Route path='profile-director' element={<ProfileDirector />} />
+                  <Route path='profile-director/update-profile-director' element={<UpdateProfileDirector />} />
 
                   <Route path='update-password' element={<UpdatePassword />} />
+                 
                 </Route>
 
 
           //Rutas del profesor
                 <Route path='teacher' element={<PrivateRouteTeacher isAuthenticated={isAuthenticated} />}>
                   <Route index element={<TeacherView />} />
-                  <Route path='profile-teacher' element={<Profile />} />
+                  <Route path='profile-teacher' element={<ProfileTeacher />} />
+                  <Route path='profile-teacher/update-profile-techar' element={<UpdateProfileTeacher />} />
 
                   <Route path='update-password' element={<UpdatePassword />} />
 
@@ -105,8 +111,6 @@ function App() {
                 </Route>
 
 
-                // Ruta unificada para actualizar el perfil (funciona para ambos roles)
-                <Route path=":role/update-profile" element={<UpdateProfile />} />
 
 
               </Routes>

@@ -1,44 +1,77 @@
 import { useState } from "react";
+import Axios from "../../../axios/Axios";
+import ErrorAlert from "../../../components/alerts/ErrorAlert";
+import SuccessAlert from "../../../components/alerts/SuccessAlert";
+import { FaCopy } from "react-icons/fa";
 
 const CreateUser = () => {
   const [user, setUser] = useState({
-    role: "",
     institutionalEmail: "",
     name: "",
     personalEmail: "",
     phone: "",
     code: "",
+    profileType: "",
   });
 
-  const [errors, setErrors] = useState({});
+  const [errorAlert, setErrorAlert] = useState({ error: false, message: "" });
+  const [successAlert, setSuccessAlert] = useState({ success: false, message: "" });
+  const [showModal, setShowModal] = useState(false);
+  const [createdUser, setCreatedUser] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-
     setUser((prev) => ({
       ...prev,
       [name]: type === "radio" ? value : value.trim(),
     }));
   };
 
-  const validateForm = () => {
-    let newErrors = {};
-    if (!user.role) newErrors.role = "Selecciona un rol";
-    if (!user.institutionalEmail) {
-      newErrors.institutionalEmail = "Correo institucional es obligatorio";
-    } else if (!/^[\w.%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/.test(user.institutionalEmail)) {
-      newErrors.institutionalEmail = "Correo no válido";
-    }
-    if (!user.name) newErrors.name = "El nombre es obligatorio";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!user.institutionalEmail || !user.name || !user.profileType) {
+      setErrorAlert({ error: true, message: "Todos los campos obligatorios deben estar completos" });
+      setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
+      return;
+    }
+
+    try {
+      const res = await Axios.post("user", user);
+      if (res.status === 200) {
+        setSuccessAlert({ success: true, message: "Usuario creado exitosamente" });
+        setCreatedUser(res.data); // Guardar los datos recibidos del servidor
+        setShowModal(true); // Mostrar el modal con los datos
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorAlert({ error: true, message: error.response?.data || "Error al crear el usuario" });
+    }
+
+    setTimeout(() => {
+      setErrorAlert({ error: false, message: "" });
+      setSuccessAlert({ success: false, message: "" });
+    }, 5000);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      console.log("Usuario creado:", user);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setCreatedUser(null);
+    // Limpiar los inputs del formulario
+    setUser({
+      institutionalEmail: "",
+      name: "",
+      personalEmail: "",
+      phone: "",
+      code: "",
+      profileType: "",
+    });
+  };
+
+  const copyToClipboard = () => {
+    if (createdUser?.password) {
+      navigator.clipboard.writeText(createdUser.password);
+      alert("Contraseña copiada al portapapeles");
     }
   };
 
@@ -47,6 +80,11 @@ const CreateUser = () => {
       <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
         Crear Usuario
       </h2>
+
+      {/* Alerta */}
+      {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
+      {successAlert.success && <SuccessAlert message={successAlert.message} />}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Selección de Rol */}
         <div className="flex flex-col items-center">
@@ -55,9 +93,9 @@ const CreateUser = () => {
             <label className="flex items-center gap-2">
               <input
                 type="radio"
-                name="role"
-                value="Director"
-                checked={user.role === "Director"}
+                name="profileType"
+                value="DIRECTOR"
+                checked={user.profileType === "DIRECTOR"}
                 onChange={handleChange}
                 className="w-5 h-5 accent-red-500"
               />
@@ -66,16 +104,15 @@ const CreateUser = () => {
             <label className="flex items-center gap-2">
               <input
                 type="radio"
-                name="role"
-                value="Docente"
-                checked={user.role === "Docente"}
+                name="profileType"
+                value="TEACHER"
+                checked={user.profileType === "TEACHER"}
                 onChange={handleChange}
                 className="w-5 h-5 accent-red-500"
               />
               Docente
             </label>
           </div>
-          {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
         </div>
 
         {/* Campos del Formulario */}
@@ -88,11 +125,7 @@ const CreateUser = () => {
               placeholder="Correo Institucional"
               value={user.institutionalEmail}
               onChange={handleChange}
-              className={`border p-3 w-full rounded-md ${
-                errors.institutionalEmail ? "border-red-500" : "border-gray-300"
-              }`}
             />
-            {errors.institutionalEmail && <p className="text-red-500 text-sm mt-1">{errors.institutionalEmail}</p>}
           </div>
 
           {/* Nombre */}
@@ -103,11 +136,7 @@ const CreateUser = () => {
               placeholder="Nombre"
               value={user.name}
               onChange={handleChange}
-              className={`border p-3 w-full rounded-md ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
             />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
           {/* Correo Personal */}
@@ -155,6 +184,39 @@ const CreateUser = () => {
           Crear Usuario
         </button>
       </form>
+
+      {/* Modal */}
+      {showModal && createdUser && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+            <h3 className="text-xl font-bold mb-4">Usuario Creado Exitosamente</h3>
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md">
+              <strong>Advertencia:</strong> Por favor, copie la contraseña antes de cerrar el modal. No se volvera a mostrar.
+            </div>
+            <p><strong>Nombre:</strong> {createdUser.name}</p>
+            <p><strong>Correo Institucional:</strong> {createdUser.institutionalEmail}</p>
+            <div className=" items-center justify-between bg-gray-100  rounded-md ">
+              <p><strong>Contraseña:</strong> {createdUser.password} <button
+                onClick={copyToClipboard}
+                className=" relative text-blue-500 p-2 rounded-md hover:bg-blue-200 transition-all group"
+              >
+                <FaCopy />
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  Copiar
+                </span>
+              </button></p>
+
+
+            </div>
+            <button
+              onClick={handleCloseModal}
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-all"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

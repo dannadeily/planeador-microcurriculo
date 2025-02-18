@@ -1,35 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { MdEdit } from "react-icons/md";
 import { Link } from 'react-router-dom';
+import Axios from '../../../axios/Axios';
+import ErrorAlert from '../../../components/alerts/ErrorAlert';
 
 const ListTeacher = () => {
-  const [docentes, setDocentes] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const docentesPerPage = 5;
 
   useEffect(() => {
-    const mockData = [
-      { id: 1, email: "docente1@universidad.edu", name: "Juan Pérez", personalEmail: "juan@gmail.com", phone: "123456789", code: "D001" },
-      { id: 2, email: "docente2@universidad.edu", name: "María López", personalEmail: "maria@gmail.com", phone: "987654321", code: "D002" },
-      { id: 3, email: "docente3@universidad.edu", name: "Carlos Sánchez", personalEmail: "carlos@gmail.com", phone: "456789123", code: "D003" },
-      { id: 4, email: "docente4@universidad.edu", name: "Ana Ramírez", personalEmail: "ana@gmail.com", phone: "789123456", code: "D004" },
-      { id: 5, email: "docente5@universidad.edu", name: "Luis Gómez", personalEmail: "luis@gmail.com", phone: "321654987", code: "D005" }
-    ];
-    setDocentes(mockData);
+    const fetchTeachers = async () => {
+      try {
+        const response = await Axios.get('user/list?profileType=TEACHER');
+        setTeachers(response.data);
+      } catch (err) {
+        setError("Error al cargar los teachers");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTeachers();
   }, []);
 
   const indexOfLastDocente = currentPage * docentesPerPage;
   const indexOfFirstDocente = indexOfLastDocente - docentesPerPage;
-  const currentDocentes = docentes.slice(indexOfFirstDocente, indexOfLastDocente);
-  const totalPages = Math.ceil(docentes.length / docentesPerPage);
+  const currentDocentes = teachers.slice(indexOfFirstDocente, indexOfLastDocente);
+  const totalPages = Math.ceil(teachers.length / docentesPerPage);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
         Lista de Docentes Registrados
       </h2>
-
-      {docentes.length === 0 ? (
+      
+      {loading ? (
+        <p className="text-center text-gray-500">Cargando...</p>
+      ) : error ? (
+        <ErrorAlert message={error} />
+      ) : teachers.length === 0 ? (
         <p className="text-center text-gray-500">No hay docentes registrados.</p>
       ) : (
         <>
@@ -42,29 +53,18 @@ const ListTeacher = () => {
                   <th className="px-4 py-3 text-center">Correo Personal</th>
                   <th className="px-4 py-3 text-center">Teléfono</th>
                   <th className="px-4 py-3 text-center">Código</th>
-                  <th className="px-4 py-3 text-center">Acciones</th>
+               
                 </tr>
               </thead>
               <tbody>
                 {currentDocentes.map((docente) => (
                   <tr key={docente.id} className="border-t hover:bg-gray-100">
-                    <td className="px-4 py-3">{docente.email}</td>
+                    <td className="px-4 py-3">{docente.institutionalEmail}</td>
                     <td className="px-4 py-3 text-center">{docente.name}</td>
-                    <td className="px-4 py-3 text-center">{docente.personalEmail}</td>
-                    <td className="px-4 py-3 text-center">{docente.phone}</td>
-                    <td className="px-4 py-3 text-center">{docente.code}</td>
-                    <td className="px-4 py-3 text-center">
-                      <Link to={`/director/edit-user/${docente.id}`}>
-                        <button
-                          className="relative text-blue-500 p-2 rounded-md hover:bg-red-200 transition-all group"
-                        >
-                          <MdEdit size={20} />
-                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                            Editar
-                          </span>
-                        </button>
-                      </Link>
-                    </td>
+                    <td className="px-4 py-3 text-center">{docente.personalEmail || "N/A"}</td>
+                    <td className="px-4 py-3 text-center">{docente.phone || "N/A"}</td>
+                    <td className="px-4 py-3 text-center">{docente.code || "N/A"}</td>
+                   
                   </tr>
                 ))}
               </tbody>

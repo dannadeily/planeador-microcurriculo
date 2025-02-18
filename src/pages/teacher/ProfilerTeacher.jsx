@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../axios/Axios';
 
-const Profile = () => {
+const ProfileTeacher = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
     name: '',
@@ -45,7 +45,7 @@ const Profile = () => {
       <div className="flex justify-end mt-6">
         <button
           type="button"
-          onClick={() => navigate(`/director/profile-director/update-profile-director`)}
+          onClick={() => navigate(`/teacher/profile-teacher/update-profile-teacher`)}
           className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700"
         >
           Editar Datos
@@ -55,4 +55,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfileTeacher;
