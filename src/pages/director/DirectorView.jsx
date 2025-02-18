@@ -1,30 +1,68 @@
 import { useState, useEffect } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { Link } from "react-router-dom";
+import Axios from "../../axios/Axios";
 
 const DirectorView = () => {
     const [assignments, setAssignments] = useState([]);
-    const [isSemesterActive, setIsSemesterActive] = useState(true);
+    const [isSemesterActive, setIsSemesterActive] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const assignmentsPerPage = 5;
 
     useEffect(() => {
-        const mockData = [
-            { id: 1, course: "Matemáticas Avanzadas", docente: "pepe", group: "A1" },
-            { id: 2, course: "Historia Universal", docente: "pepe 2", group: "B2" },
-            { id: 3, course: "Programación Web", docente: "pepe 3", group: "C3" },
-            { id: 4, course: "Física Cuántica", docente: "pepe 4", group: "D4" },
-            { id: 5, course: "Química Orgánica", docente: "pepe 5", group: "E5" },
-            { id: 6, course: "Literatura Española", docente: "pepe 6", group: "F6" },
-            { id: 7, course: "Geometría Analítica", docente: "pepe 7", group: "G7" }
-        ];
-        setAssignments(mockData);
+        // Obtener el semestre activo
+        const getActiveSemester = async () => {
+            try {
+                const response = await Axios.get("semester/active");
+                if (response.data && response.data.id) {
+                    setIsSemesterActive(true); // El semestre está activo
+                    fetchAssignments(response.data.id); // Obtener asignaciones para el semestre activo
+                } else {
+                    setIsSemesterActive(false); // No hay semestre activo
+                }
+            } catch (error) {
+                console.error("Error al obtener el semestre activo", error);
+                setIsSemesterActive(false); // En caso de error, no hay semestre activo
+            }
+        };
+        getActiveSemester();
     }, []);
 
-    const handleDelete = (id) => {
-        setAssignments(assignments.filter((assignment) => assignment.id !== id));
+    // Obtener asignaciones para un semestre específico
+    const fetchAssignments = async (idSemester) => {
+        try {
+            const response = await Axios.get(`assignment/director?idSemester=${idSemester}`);
+            if (response.data) {
+                setAssignments(response.data);
+            }
+        } catch (error) {
+            console.error("Error al obtener las asignaciones", error);
+        }
     };
 
+    // Eliminar una asignación
+    const handleDelete = async (id) => {
+        try {
+            // Hacer una solicitud DELETE para eliminar la asignación por ID
+            const response = await Axios.delete(`assignment?idAssignment=${id}`);
+            console.log("Asignación eliminada exitosamente", response.data);
+    
+            // Eliminar la asignación localmente
+            setAssignments(assignments.filter((assignment) => assignment.id !== id));
+        } catch (error) {
+            if (error.response) {
+                // Si hay una respuesta del servidor
+                console.error("Error al eliminar la asignación", error.response.data);
+            } else if (error.request) {
+                // Si la solicitud fue realizada pero no hubo respuesta
+                console.error("Error en la solicitud", error.request);
+            } else {
+                // Si hubo un error al configurar la solicitud
+                console.error("Error desconocido", error.message);
+            }
+        }
+    };
+    
     const indexOfLastAssignment = currentPage * assignmentsPerPage;
     const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage;
     const currentAssignments = assignments.slice(indexOfFirstAssignment, indexOfLastAssignment);
@@ -50,13 +88,13 @@ const DirectorView = () => {
                             <tbody>
                                 {currentAssignments.map((assignment) => (
                                     <tr key={assignment.id} className="border-t hover:bg-gray-100">
-                                        <td className="px-4 py-3">{assignment.course}</td>
-                                        <td className="px-4 py-3 text-center">{assignment.docente}</td>
+                                        <td className="px-4 py-3">{assignment.courseName}</td>
+                                        <td className="px-4 py-3 text-center">{assignment.teacherName}</td>
                                         <td className="px-4 py-3 text-center">{assignment.group}</td>
                                         <td className="px-4 py-3 text-center">
                                             <button
                                                 onClick={() => handleDelete(assignment.id)}
-                                                className=" text-red-600 p-2 rounded-md hover:bg-red-200 transition-all"
+                                                className="text-red-600 p-2 rounded-md hover:bg-red-200 transition-all"
                                             >
                                                 <MdDeleteForever size={20} />
                                             </button>
@@ -83,14 +121,13 @@ const DirectorView = () => {
                             Siguiente
                         </button>
                     </div>
-                    <Link  to="/director/assign-teacher">
+                    <Link to="/director/assign-teacher">
                         <div className="mt-4 text-center">
                             <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-all">
                                 Asignar Docente a un Curso
                             </button>
                         </div>
                     </Link>
-
                 </>
             ) : (
                 <div className="flex flex-col items-center justify-center h-[70vh] text-center">

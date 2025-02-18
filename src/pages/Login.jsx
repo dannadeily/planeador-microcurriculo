@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../axios/Axios";
+import Axios from "../axios/Axios";
 import { useNavigate } from "react-router-dom";
 import ErrorAlert from "../components/alerts/ErrorAlert";
 import SuccessAlert from "../components/alerts/SuccessAlert";
@@ -39,7 +39,7 @@ const Login = () => {
         }
 
         try {
-            const res = await axios.post("auth/login", {
+            const res = await Axios.post("auth/login", {
                 institutionalEmail: user.institutionalEmail,
                 password: user.password,
             });
