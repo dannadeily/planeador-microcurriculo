@@ -6,29 +6,27 @@ import Axios from "../../axios/Axios";
 const DirectorView = () => {
     const [assignments, setAssignments] = useState([]);
     const [isSemesterActive, setIsSemesterActive] = useState(false);
-    const [currentPage, setCurrentPage] = useState(0);  // Cambiar de 1 a 0
+    const [currentPage, setCurrentPage] = useState(1);
     const assignmentsPerPage = 5;
 
     useEffect(() => {
-        // Obtener el semestre activo
         const getActiveSemester = async () => {
             try {
                 const response = await Axios.get("semester/active");
                 if (response.data && response.data.id) {
-                    setIsSemesterActive(true); // El semestre está activo
-                    fetchAssignments(response.data.id); // Obtener asignaciones para el semestre activo
+                    setIsSemesterActive(true);
+                    fetchAssignments(response.data.id);
                 } else {
-                    setIsSemesterActive(false); // No hay semestre activo
+                    setIsSemesterActive(false);
                 }
             } catch (error) {
                 console.error("Error al obtener el semestre activo", error);
-                setIsSemesterActive(false); // En caso de error, no hay semestre activo
+                setIsSemesterActive(false);
             }
         };
         getActiveSemester();
     }, []);
 
-    // Obtener asignaciones para un semestre específico
     const fetchAssignments = async (idSemester) => {
         try {
             const response = await Axios.get(`assignment/director?idSemester=${idSemester}`);
@@ -40,31 +38,16 @@ const DirectorView = () => {
         }
     };
 
-    // Eliminar una asignación
     const handleDelete = async (id) => {
         try {
-            // Hacer una solicitud DELETE para eliminar la asignación por ID
-            const response = await Axios.delete(`assignment?idAssignment=${id}`);
-            console.log("Asignación eliminada exitosamente", response.data);
-
-            // Eliminar la asignación localmente
+            await Axios.delete(`assignment?idAssignment=${id}`);
             setAssignments(assignments.filter((assignment) => assignment.id !== id));
         } catch (error) {
-            if (error.response) {
-                // Si hay una respuesta del servidor
-                console.error("Error al eliminar la asignación", error.response.data);
-            } else if (error.request) {
-                // Si la solicitud fue realizada pero no hubo respuesta
-                console.error("Error en la solicitud", error.request);
-            } else {
-                // Si hubo un error al configurar la solicitud
-                console.error("Error desconocido", error.message);
-            }
+            console.error("Error al eliminar la asignación", error);
         }
     };
 
-    // Ajustar los índices de la paginación para empezar desde 0
-    const indexOfLastAssignment = (currentPage + 1) * assignmentsPerPage;
+    const indexOfLastAssignment = currentPage * assignmentsPerPage;
     const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage;
     const currentAssignments = assignments.slice(indexOfFirstAssignment, indexOfLastAssignment);
     const totalPages = Math.ceil(assignments.length / assignmentsPerPage);
@@ -107,17 +90,17 @@ const DirectorView = () => {
                     </div>
                     <div className="flex justify-between items-center mt-4">
                         <button
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}  // Cambiar a 0 en vez de 1
-                            disabled={currentPage === 0}  // No puede ir a páginas menores que 0
-                            className={`px-4 py-2 rounded-md ${currentPage === 0 ? "bg-gray-300" : "bg-red-500 text-white hover:bg-red-700"}`}
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300" : "bg-red-500 text-white hover:bg-red-700"}`}
                         >
                             Anterior
                         </button>
-                        <span>Página {currentPage} de {totalPages}</span> {/* Mostrar la página directamente */}
+                        <span>Página {currentPage} de {totalPages}</span>
                         <button
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}  // Ajustar para que no supere el número total de páginas
-                            disabled={currentPage === totalPages - 1}
-                            className={`px-4 py-2 rounded-md ${currentPage === totalPages - 1 ? "bg-gray-300" : "bg-red-700 text-white hover:bg-red-800"}`}
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-300" : "bg-red-700 text-white hover:bg-red-800"}`}
                         >
                             Siguiente
                         </button>
