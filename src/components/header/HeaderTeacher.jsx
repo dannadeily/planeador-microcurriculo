@@ -46,7 +46,7 @@ const HeaderTeacher = () => {
             </button>
             {isUserMenuOpen && (
               <ul className="absolute right-0 mt-2 w-40 bg-white text-black rounded-md shadow-lg">
-                <li><Link to="Profile-director" className="block px-4 py-2 hover:bg-gray-200">Perfil</Link></li>
+                <li><Link to="Profile-teacher" className="block px-4 py-2 hover:bg-gray-200">Perfil</Link></li>
                 <li><Link to="update-password" className="block px-4 py-2 hover:bg-gray-200">Cambiar Contraseña</Link></li>
               </ul>
             )}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from '../../axios/Axios';
 import ErrorAlert from '../../components/alerts/ErrorAlert';
 import SuccessAlert from '../../components/alerts/SuccessAlert';
 
 const UpdateProfile = () => {
   const navigate = useNavigate();
+  const { role } = useParams(); // Obtener el rol de la URL (director o teacher)
+
   const [user, setUser] = useState({
     name: '',
     personalEmail: '',
@@ -16,9 +18,7 @@ const UpdateProfile = () => {
   const [errorAlert, setErrorAlert] = useState({ error: false, message: '' });
   const [successAlert, setSuccessAlert] = useState({ success: false, message: '' });
 
-
-
-  // Obtener datos del usuario y prellenar el formulario
+  // Obtener datos del usuario logueado y prellenar el formulario
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -26,6 +26,7 @@ const UpdateProfile = () => {
         setUser(response.data);
       } catch (error) {
         console.error('Error al obtener los datos del usuario', error);
+        setErrorAlert({ error: true, message: 'Error al cargar los datos del perfil.' });
       }
     };
 
@@ -50,10 +51,11 @@ const UpdateProfile = () => {
 
       // Esperar un momento para mostrar la alerta antes de redirigir
       setTimeout(() => {
-        navigate('/director/profile-director');  // Redirigir a la vista de perfil
-      }, 2000);  // 2000 milisegundos (2 segundos) de espera para la alerta
+        navigate(`/${role}/profile-${role}`); // Redirigir al perfil según el rol
+      }, 2000);
     } catch (error) {
       console.error('Error al actualizar los datos', error);
+      setErrorAlert({ error: true, message: 'No se pudieron actualizar los datos.' });
     }
   };
 
@@ -115,7 +117,7 @@ const UpdateProfile = () => {
           />
         </div>
         <div className="flex justify-end mt-6 space-x-4">
-          <Link to="/director/profile-director" className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">
+          <Link to={`/${role}/profile-${role}`} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">
             Volver
           </Link>
           <button
