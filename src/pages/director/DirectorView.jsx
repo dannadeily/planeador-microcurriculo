@@ -6,7 +6,7 @@ import Axios from "../../axios/Axios";
 const DirectorView = () => {
     const [assignments, setAssignments] = useState([]);
     const [isSemesterActive, setIsSemesterActive] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(0);  // Cambiar de 1 a 0
     const assignmentsPerPage = 5;
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const DirectorView = () => {
             // Hacer una solicitud DELETE para eliminar la asignación por ID
             const response = await Axios.delete(`assignment?idAssignment=${id}`);
             console.log("Asignación eliminada exitosamente", response.data);
-    
+
             // Eliminar la asignación localmente
             setAssignments(assignments.filter((assignment) => assignment.id !== id));
         } catch (error) {
@@ -62,8 +62,9 @@ const DirectorView = () => {
             }
         }
     };
-    
-    const indexOfLastAssignment = currentPage * assignmentsPerPage;
+
+    // Ajustar los índices de la paginación para empezar desde 0
+    const indexOfLastAssignment = (currentPage + 1) * assignmentsPerPage;
     const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage;
     const currentAssignments = assignments.slice(indexOfFirstAssignment, indexOfLastAssignment);
     const totalPages = Math.ceil(assignments.length / assignmentsPerPage);
@@ -106,17 +107,17 @@ const DirectorView = () => {
                     </div>
                     <div className="flex justify-between items-center mt-4">
                         <button
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                            className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300" : "bg-red-500 text-white hover:bg-red-700"}`}
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}  // Cambiar a 0 en vez de 1
+                            disabled={currentPage === 0}  // No puede ir a páginas menores que 0
+                            className={`px-4 py-2 rounded-md ${currentPage === 0 ? "bg-gray-300" : "bg-red-500 text-white hover:bg-red-700"}`}
                         >
                             Anterior
                         </button>
-                        <span>Página {currentPage} de {totalPages}</span>
+                        <span>Página {currentPage} de {totalPages}</span> {/* Mostrar la página directamente */}
                         <button
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                            className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-300" : "bg-red-700 text-white hover:bg-red-800"}`}
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}  // Ajustar para que no supere el número total de páginas
+                            disabled={currentPage === totalPages - 1}
+                            className={`px-4 py-2 rounded-md ${currentPage === totalPages - 1 ? "bg-gray-300" : "bg-red-700 text-white hover:bg-red-800"}`}
                         >
                             Siguiente
                         </button>
