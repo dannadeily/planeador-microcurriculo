@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { FaBars, FaUser, FaTimes, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaBookOpen } from "react-icons/fa";
 import { FaHouseChimney } from "react-icons/fa6";
@@ -15,6 +15,8 @@ const HeaderDirector = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const mobileMenuRef = useRef(null);
 
   const toggleMenu = (menu) => {
     setActiveMenu(activeMenu === menu ? null : menu);
@@ -49,6 +51,20 @@ const HeaderDirector = () => {
     };
   }, []);
 
+  // Cierra solo el menú móvil si se hace clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     const getActiveSemester = async () => {
       try {
@@ -67,13 +83,13 @@ const HeaderDirector = () => {
       }
     };
     getActiveSemester();
-  }, []); 
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="bg-red-500 p-5 fixed top-0 left-0 w-full z-50 flex justify-between items-center">
-        <h1 className="text-white font-bold text-lg">  
+      <header className="bg-red-500 p-5 fixed top-0 left-0 w-full z-50 flex justify-between items-center h-16">
+        <h1 className="text-white font-bold text-lg">
           {activeSemester.name ? `Semestre Activo:  ${activeSemester.name} Fecha Inicio: ${activeSemester.startDate} - Fecha Fin: ${activeSemester.endDate}` : "No Hay Semestre Activo"}
         </h1>
 
@@ -115,9 +131,8 @@ const HeaderDirector = () => {
       </header>
 
       {/* Menú de Navegación */}
-      <nav
-        className={`bg-red-400 text-white fixed top-16 left-0 w-full z-40 p-2 transition-all duration-300 menu-container ${isMobileMenuOpen ? "block" : "hidden md:flex md:justify-center"
-          }`}
+      <nav ref={mobileMenuRef}
+        className={`bg-red-400 text-white fixed top-16 left-0 w-full z-40 p-2 transition-all duration-300 ${isMobileMenuOpen ? "block" : "hidden md:flex md:justify-center"}`}
       >
         <ul className="flex flex-col md:flex-row md:space-x-4 w-full">
           <li key="opcion0">

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import { AlertProvider } from './context/AlertContext'; 
+import { AlertProvider } from './context/AlertContext';
 import FlashMessage from './components/alerts/FlashMessage'
 
 
@@ -20,14 +20,15 @@ import EditCourse from './pages/director/course/EditCourse'
 import CreateSemester from './pages/director/semester/CreateSemester'
 import ListSemester from './pages/director/semester/ListSemester'
 import EditSemester from './pages/director/semester/EditSemester'
-import ProfileDirector from './pages/director/ProfileDirector'
-import UpdateProfile from './pages/director/UpdateProfile'
+
 import DirectorView from './pages/director/DirectorView'
 import AssignTeacher from './pages/director/AssignTeacher'
 
 //Profesor
 
 import TeacherView from './pages/teacher/TeacherView'
+
+
 
 //Rutas privadas
 
@@ -38,7 +39,9 @@ import PrivateRouteTeacher from './layout/privateRouteTeacher'
 import Footer from './components/footer/Footer'
 
 //para director y profesor
-import UpdatePassword from './pages/UpdatePassword'
+import Profile from './pages/user/Profile'
+import UpdateProfile from './pages/user/UpdateProfile'
+import UpdatePassword from './pages/user/UpdatePassword'
 
 //Estilos
 import './App.css'
@@ -85,8 +88,8 @@ function App() {
                   <Route path='create-semester' element={<CreateSemester />} />
                   <Route path='list-semester' element={<ListSemester />} />
                   <Route path='edit-semester/:id' element={<EditSemester />} />
-                  <Route path='profile-director' element={<ProfileDirector />} />
-                  <Route path='update-profile-director' element={<UpdateProfile />} />
+                  <Route path='profile-director' element={<Profile />} />
+                  <Route path="profile-director/update-profile-director" element={<UpdateProfile />} />
                   <Route path='update-password' element={<UpdatePassword />} />
                 </Route>
 

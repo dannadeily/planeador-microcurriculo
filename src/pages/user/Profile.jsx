@@ -1,27 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from '../../axios/Axios';
 
-const ProfileDirector = () => {
+const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
-    role: '',
-    institutionalEmail: '',
     name: '',
     personalEmail: '',
     phone: '',
     code: ''
   });
 
+  // Función para decodificar el token
+  const decodeToken = (token) => {
+    const array = token.split(".");
+    const payload = JSON.parse(atob(array[1]));
+    return payload;
+  }
+
   useEffect(() => {
-    const mockData = {
-      role: "Docente",
-      institutionalEmail: "usuario@universidad.edu",
-      name: "Juan Pérez",
-      personalEmail: "juanperez@gmail.com",
-      phone: "123456789",
-      code: "U001"
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`user`);
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario', error);
+      }
     };
-    setUser(mockData);
+
+    fetchUserData();
   }, []);
 
   return (
@@ -30,7 +37,6 @@ const ProfileDirector = () => {
         Datos del Perfil
       </h2>
       <div className="space-y-4">
-        <p><strong>Correo Institucional:</strong> {user.institutionalEmail}</p>
         <p><strong>Nombre:</strong> {user.name}</p>
         <p><strong>Correo Personal:</strong> {user.personalEmail}</p>
         <p><strong>Teléfono:</strong> {user.phone}</p>
@@ -39,7 +45,7 @@ const ProfileDirector = () => {
       <div className="flex justify-end mt-6">
         <button
           type="button"
-          onClick={() => navigate('/director/update-profile-director')}
+          onClick={() => navigate(`/director/profile-director/update-profile-director`)}
           className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700"
         >
           Editar Datos
@@ -49,4 +55,4 @@ const ProfileDirector = () => {
   );
 };
 
-export default ProfileDirector;
+export default Profile;
