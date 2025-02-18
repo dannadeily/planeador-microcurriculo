@@ -89,7 +89,7 @@ function App() {
                   <Route path='list-semester' element={<ListSemester />} />
                   <Route path='edit-semester/:id' element={<EditSemester />} />
                   <Route path='profile-director' element={<Profile />} />
-                  <Route path="profile-director/update-profile-director" element={<UpdateProfile />} />
+
                   <Route path='update-password' element={<UpdatePassword />} />
                 </Route>
 
@@ -97,9 +97,16 @@ function App() {
           //Rutas del profesor
                 <Route path='teacher' element={<PrivateRouteTeacher isAuthenticated={isAuthenticated} />}>
                   <Route index element={<TeacherView />} />
+                  <Route path='profile-teacher' element={<Profile />} />
+
+                  <Route path='update-password' element={<UpdatePassword />} />
+
 
                 </Route>
 
+
+                // Ruta unificada para actualizar el perfil (funciona para ambos roles)
+                <Route path=":role/update-profile" element={<UpdateProfile />} />
 
 
               </Routes>

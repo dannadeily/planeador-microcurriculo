@@ -8,21 +8,30 @@ const Profile = () => {
     name: '',
     personalEmail: '',
     phone: '',
-    code: ''
+    code: '',
+    role: ''  // Nuevo estado para almacenar el rol
   });
 
-  // Función para decodificar el token
-  const decodeToken = (token) => {
-    const array = token.split(".");
-    const payload = JSON.parse(atob(array[1]));
-    return payload;
-  }
+  // Función para obtener el rol desde el token
+  const getRoleFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+
+    try {
+      const array = token.split(".");
+      const payload = JSON.parse(atob(array[1]));
+      return payload.role;  // Ajusta esto según cómo se almacene el rol en tu token
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(`user`);
-        setUser(response.data);
+        setUser({ ...response.data, role: getRoleFromToken() }); // Agrega el rol al estado
       } catch (error) {
         console.error('Error al obtener los datos del usuario', error);
       }
@@ -45,7 +54,7 @@ const Profile = () => {
       <div className="flex justify-end mt-6">
         <button
           type="button"
-          onClick={() => navigate(`/director/profile-director/update-profile-director`)}
+          onClick={() => navigate(`/${user.role}/update-profile`)}
           className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700"
         >
           Editar Datos
