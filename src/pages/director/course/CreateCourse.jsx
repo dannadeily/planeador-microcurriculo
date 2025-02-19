@@ -1,22 +1,26 @@
 import { useState } from "react";
+import Axios from "../../../axios/Axios";
+import ErrorAlert from "../../../components/alerts/ErrorAlert";
+import SuccessAlert from "../../../components/alerts/SuccessAlert";
 
 const CreateCourse = () => {
-  const [course, setCourse] = useState({
-    name: "",
+  const initialState = {
+    courseName: "",
     description: "",
     code: "",
-    file: null,
-  });
+    fileContent: "",
+    fileType: "",
+  };
 
-  const [errors, setErrors] = useState({});
-  const [fileBase64, setFileBase64] = useState("");
+  const [course, setCourse] = useState(initialState);
+  const [errorAlert, setErrorAlert] = useState({ error: false, message: "" });
+  const [successAlert, setSuccessAlert] = useState({ success: false, message: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setCourse((prev) => ({
       ...prev,
-      [name]: name === "code" ? value.replace(/\D/, "") : value.trim(), // Solo números en código
+      [name]: name === "code" ? value.replace(/\D/g, "") : value.trim(),
     }));
   };
 
@@ -26,25 +30,39 @@ const CreateCourse = () => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        setFileBase64(reader.result);
+        setCourse((prev) => ({
+          ...prev,
+          fileContent: reader.result,
+          fileType: file.type,
+        }));
       };
-      setCourse((prev) => ({ ...prev, file }));
     }
   };
 
-  const validateForm = () => {
-    let newErrors = {};
-    if (!course.name) newErrors.name = "El nombre del curso es obligatorio";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      const courseData = { ...course, fileBase64 };
-      console.log("Curso creado:", courseData);
+
+    if (!course.courseName) {
+      setErrorAlert({ error: true, message: "El nombre del curso es obligatorio" });
+      setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
+      return;
     }
+
+    try {
+      const res = await Axios.post("course", course);
+      if (res.status === 200) {
+        setSuccessAlert({ success: true, message: res.data.message || "Curso creado exitosamente" });
+        setCourse(initialState); // Limpiar el formulario
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorAlert({ error: true, message: error.response?.data || "Error al crear el curso" });
+    }
+
+    setTimeout(() => {
+      setErrorAlert({ error: false, message: "" });
+      setSuccessAlert({ success: false, message: "" });
+    }, 5000);
   };
 
   return (
@@ -52,22 +70,23 @@ const CreateCourse = () => {
       <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
         Crear Curso
       </h2>
+
+      {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
+      {successAlert.success && <SuccessAlert message={successAlert.message} />}
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Nombre del Curso */}
         <div>
           <input
             type="text"
-            name="name"
+            name="courseName"
             placeholder="Nombre del Curso"
-            value={course.name}
+            value={course.courseName}
             onChange={handleChange}
-            className={`border p-3 w-full rounded-md ${errors.name ? "border-red-500" : "border-gray-300"
-              }`}
+            className="border p-3 w-full rounded-md border-gray-300"
+            required
           />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
         </div>
 
-        {/* Descripción del Curso */}
         <div>
           <textarea
             name="description"
@@ -78,7 +97,6 @@ const CreateCourse = () => {
           />
         </div>
 
-        {/* Código del Curso */}
         <div>
           <input
             type="text"
@@ -90,7 +108,6 @@ const CreateCourse = () => {
           />
         </div>
 
-        {/* Cargar Archivo */}
         <div>
           <label className="block font-medium mb-2">Cargar Archivo (Opcional):</label>
           <input
@@ -100,7 +117,6 @@ const CreateCourse = () => {
           />
         </div>
 
-        {/* Botón de Envío */}
         <button
           type="submit"
           className="bg-red-500 w-full py-3 text-white uppercase font-bold rounded-md hover:bg-red-700 transition-all"
