@@ -39,7 +39,7 @@ const CreateUser = () => {
     try {
       const res = await Axios.post("user", user);
       if (res.status === 200) {
-        setSuccessAlert({ success: true, message: "Usuario creado exitosamente" });
+        setSuccessAlert({ success: true, message: res.data.message || "Usuario creado exitosamente" });
         setCreatedUser(res.data); // Guardar los datos recibidos del servidor
         setShowModal(true); // Mostrar el modal con los datos
       }
@@ -125,6 +125,7 @@ const CreateUser = () => {
               placeholder="Correo Institucional"
               value={user.institutionalEmail}
               onChange={handleChange}
+              className="border p-3 w-full rounded-md border-gray-300"
             />
           </div>
 
@@ -136,6 +137,7 @@ const CreateUser = () => {
               placeholder="Nombre"
               value={user.name}
               onChange={handleChange}
+              className="border p-3 w-full rounded-md border-gray-300"
             />
           </div>
 
@@ -196,17 +198,16 @@ const CreateUser = () => {
             <p><strong>Nombre:</strong> {createdUser.name}</p>
             <p><strong>Correo Institucional:</strong> {createdUser.institutionalEmail}</p>
             <div className=" items-center justify-between bg-gray-100  rounded-md ">
-              <p><strong>Contraseña:</strong> {createdUser.password} <button
+              <p><strong>Contraseña:</strong> {createdUser.password}
+               <button
                 onClick={copyToClipboard}
-                className=" relative text-blue-500 p-2 rounded-md hover:bg-blue-200 transition-all group"
+                className=" relative text-black p-2 rounded-md hover:bg-blue-200 transition-all group"
               >
-                <FaCopy />
+                <FaCopy /> 
                 <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
                   Copiar
                 </span>
               </button></p>
-
-
             </div>
             <button
               onClick={handleCloseModal}
