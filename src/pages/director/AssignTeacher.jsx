@@ -1,39 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Axios from '../../axios/Axios';
+import ErrorAlert from '../../components/alerts/ErrorAlert';
+import SuccessAlert from '../../components/alerts/SuccessAlert';
 
 const AssignTeacher = () => {
     const navigate = useNavigate();
-    const [assignment, setAssignment] = useState({
-        course: '',
-        teacher: '',
-        group: ''
-    });
 
+    const initialState = {
+        courseId: "",
+        teacherId: "",
+        semesterId: "",
+        group: ""
+    };
+
+    const [assignment, setAssignment] = useState(initialState);
+    const [errorAlert, setErrorAlert] = useState({ error: false, message: "" });
+    const [successAlert, setSuccessAlert] = useState({ success: false, message: "" });
     const [courses, setCourses] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const groups = ['A', 'B', 'C', 'D', 'E'];
+    const [groups, setGroups] = useState(["A", "B", "C", "D", "E"]);
 
     useEffect(() => {
-        setCourses([
-            { id: 1, name: "Matemáticas" },
-            { id: 2, name: "Física" },
-            { id: 3, name: "Química" }
-        ]);
-        setTeachers([
-            { id: 1, name: "Juan Pérez" },
-            { id: 2, name: "María López" },
-            { id: 3, name: "Carlos Díaz" }
-        ]);
+        const fetchData = async () => {
+            try {
+                const coursesRes = await Axios.get('course');
+                const teachersRes = await Axios.get('user/list?profileType=TEACHER');
+                const semesterRes = await Axios.get('semester/active');
+
+                setCourses(coursesRes.data);
+                setTeachers(teachersRes.data);
+
+                setAssignment(prevState => ({
+                    ...prevState,
+                    semesterId: semesterRes.data.id
+                }));
+            } catch (error) {
+                setErrorAlert({ error: true, message: error.response?.data || "Error al obtener cursos y docentes" });
+            }
+        };
+        fetchData();
     }, []);
 
     const handleChange = (e) => {
-        setAssignment({ ...assignment, [e.target.name]: e.target.value });
+        setAssignment(prevState => ({ ...prevState, [e.target.name]: e.target.value }));
     };
 
-    const handleSubmit = (e) => {
+    const validateForm = () => {
+        if (!assignment.courseId || !assignment.teacherId || !assignment.group || !assignment.semesterId) {
+            setErrorAlert({ error: true, message: "Todos los campos son obligatorios." });
+            setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
+            return false;
+        }
+        return true;
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Asignación creada:", assignment);
-        navigate(-1);
+        if (!validateForm()) return;
+
+        try {
+            const res = await Axios.post("/assignment", assignment);
+            if (res.status === 200) {
+                setSuccessAlert({ success: true, message: res.data.message || "Asignación creada exitosamente" });
+                setAssignment(prevState => ({ ...initialState, semesterId: prevState.semesterId }));
+            }
+            setTimeout(() => {
+                navigate('/director');
+            }, 2000);
+        } catch (error) {
+            setErrorAlert({ error: true, message: error.response?.data || "Error al asignar docente" });
+        }
+
+        setTimeout(() => {
+            setErrorAlert({ error: false, message: "" });
+            setSuccessAlert({ success: false, message: "" });
+        }, 5000);
     };
 
     return (
@@ -41,13 +83,15 @@ const AssignTeacher = () => {
             <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
                 Asignar Docente a Curso
             </h2>
+            {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
+            {successAlert.success && <SuccessAlert message={successAlert.message} />}
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 gap-4">
                     <div>
                         <label className="block text-gray-700">Curso</label>
                         <select
-                            name="course"
-                            value={assignment.course}
+                            name="courseId"
+                            value={assignment.courseId}
                             onChange={handleChange}
                             className="border p-3 w-full rounded-md border-gray-300"
                         >
@@ -61,8 +105,8 @@ const AssignTeacher = () => {
                     <div>
                         <label className="block text-gray-700">Docente</label>
                         <select
-                            name="teacher"
-                            value={assignment.teacher}
+                            name="teacherId"
+                            value={assignment.teacherId}
                             onChange={handleChange}
                             className="border p-3 w-full rounded-md border-gray-300"
                         >
@@ -92,7 +136,7 @@ const AssignTeacher = () => {
                 <div className="flex justify-end space-x-4">
                     <button
                         type="button"
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate("/director")}
                         className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700"
                     >
                         Cancelar
