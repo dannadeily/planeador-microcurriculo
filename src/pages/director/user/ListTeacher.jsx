@@ -17,7 +17,7 @@ const ListTeacher = () => {
         const response = await Axios.get('user/list?profileType=TEACHER');
         setTeachers(response.data);
       } catch (err) {
-        setError("Error al cargar los teachers");
+        setError("Error al cargar los docentes");
       } finally {
         setLoading(false);
       }

@@ -17,7 +17,7 @@ const ListDirector = () => {
         const response = await Axios.get('user/list?profileType=DIRECTOR');
         setDirectors(response.data);
       } catch (err) {
-        setError("Error al cargar los directors");
+        setError("Error al cargar los directores");
       } finally {
         setLoading(false);
       }
