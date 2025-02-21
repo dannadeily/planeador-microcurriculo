@@ -26,7 +26,7 @@ const UpdateProfileDirector = () => {
         setUser(response.data);
       } catch (error) {
         console.error('Error al obtener los datos del usuario', error);
-        setErrorAlert({ error: true, message: 'Error al cargar los datos del perfil.' });
+        setErrorAlert({ error: true, message: error.response.data });
       }
     };
 
