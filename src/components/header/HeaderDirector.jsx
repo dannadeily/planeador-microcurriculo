@@ -71,7 +71,7 @@ const HeaderDirector = () => {
         const response = await Axios.get("semester/active");
         const { id, name, startDate, endDate } = response.data;  // Desestructuración de la respuesta
 
-        console.log(id); // Verifica que obtienes el id correctamente
+      
         setActiveSemester({
           id,
           name,

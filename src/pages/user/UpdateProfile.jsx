@@ -26,7 +26,7 @@ const UpdateProfile = () => {
         setUser(response.data);
       } catch (error) {
         console.error('Error al obtener los datos del usuario', error);
-        setErrorAlert({ error: true, message: 'Error al cargar los datos del perfil.' });
+        setErrorAlert({ error: true, message: error.response.data });
       }
     };
 
@@ -55,7 +55,7 @@ const UpdateProfile = () => {
       }, 2000);
     } catch (error) {
       console.error('Error al actualizar los datos', error);
-      setErrorAlert({ error: true, message: 'No se pudieron actualizar los datos.' });
+      setErrorAlert({ error: true, message: error.response.data });
     }
   };
 

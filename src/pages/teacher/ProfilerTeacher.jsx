@@ -24,7 +24,7 @@ const ProfileTeacher = () => {
         const response = await axios.get(`user`);
         setUser(response.data);
       } catch (error) {
-        console.error('Error al obtener los datos del usuario', error);
+        setErrorAlert({ error: true, message: error.response.data });
       }
     };
 
