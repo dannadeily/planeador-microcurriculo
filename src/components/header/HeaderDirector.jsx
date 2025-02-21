@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import Axios from "../../axios/Axios";
 import { FaBars, FaUser, FaTimes, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaBookOpen } from "react-icons/fa";
 import { FaHouseChimney } from "react-icons/fa6";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-
-import Axios from "../../axios/Axios";
 
 const HeaderDirector = () => {
   // Semestre activo

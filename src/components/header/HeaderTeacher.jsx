@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
+import Axios from "../../axios/Axios";
 import { FaBars, FaUser, FaTimes, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaBookOpen } from "react-icons/fa";
 import { FaHouseChimney } from "react-icons/fa6";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import SemesterBefore from "../../pages/teacher/SemesterBefore";
 
 const HeaderTeacher = () => {
+  // Semestre activo
+  const [activeSemester, setActiveSemester] = useState({ id: "", name: "", startDate: "", endDate: "" });
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -33,11 +38,34 @@ const HeaderTeacher = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const getActiveSemester = async () => {
+      try {
+        const response = await Axios.get("semester/active");
+        const { id, name, startDate, endDate } = response.data;  // Desestructuración de la respuesta
+
+
+        setActiveSemester({
+          id,
+          name,
+          startDate,
+          endDate
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getActiveSemester();
+  }, []);
+
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header className="bg-red-500 p-5 fixed top-0 left-0 w-full z-50 flex justify-between items-center h-16">
-        <h1 className="text-white font-bold text-lg">Semestre # fecha inicio fecha fin</h1>
+        <h1 className="text-white font-bold text-lg">
+          {activeSemester.name ? `Semestre Activo:  ${activeSemester.name} Fecha Inicio: ${activeSemester.startDate} - Fecha Fin: ${activeSemester.endDate}` : "No Hay Semestre Activo"}
+        </h1>
         <div className="flex items-center space-x-4">
           {/* Menú Usuario */}
           <div className="relative">
@@ -68,9 +96,7 @@ const HeaderTeacher = () => {
         </div>
         <ul className="mt-4 space-y-4 p-4">
           <li>
-            <Link to="/semestres-anteriores" className="block p-2 hover:bg-red-600">
-              <FaBookOpen className="mr-2 inline" /> Ver Semestres
-            </Link>
+            <SemesterBefore />
           </li>
         </ul>
       </div>

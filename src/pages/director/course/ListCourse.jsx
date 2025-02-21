@@ -96,10 +96,10 @@ const ListCourse = () => {
                       </button>
                     </td>
                     <td className="px-4 py-3 text-center">{course.code}</td>
-                    <td className="px-4 py-3 text-center">
-                      <button onClick={() => handleDownloadMicrocurriculum(course.id)} className="text-blue-500 hover:underline">
+                    <td className="px-4 py-3 text-center"><button onClick={() => handleDownloadMicrocurriculum(course.id)} className="text-blue-500 hover:underline">
                         Descargar
                       </button>
+                      
                     </td>
                     <td className="px-4 py-3 text-center">
                       <Link to={`/director/edit-course/${course.id}`} state={{ course }}>
