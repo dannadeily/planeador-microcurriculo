@@ -13,7 +13,7 @@ const ListCourse = () => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get('course');
-        console.log('cursos',response.data);
+        console.log('cursos', response.data);
         setCourses(response.data);
       } catch (error) {
         console.error('Error fetching courses:', error);
@@ -22,11 +22,46 @@ const ListCourse = () => {
     fetchCourses();
   }, []);
 
+  const handleDownloadMicrocurriculum = async (idCourse) => {
+    try {
+      const response = await axios.get(`course/microcurriculum?idCourse=${idCourse}`);
+      console.log("API Response:", response.data);
+
+      const { content, fileName, mimeType } = response.data;
+
+      // Extraer solo la parte base64 eliminando el prefijo "data:application/pdf;base64,"
+      const base64String = content.split(',')[1];
+
+      // Convertir base64 a binario
+      const byteCharacters = atob(base64String);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+
+      // Crear un Blob con el tipo MIME correcto
+      const blob = new Blob([byteArray], { type: mimeType });
+
+      // Crear enlace de descarga
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      console.error("Error downloading microcurriculum:", error);
+    }
+  };
+
+
+
   const indexOfLastCurso = currentPage * cursosPerPage;
   const indexOfFirstCurso = indexOfLastCurso - cursosPerPage;
   const currentCursos = courses.slice(indexOfFirstCurso, indexOfLastCurso);
   const totalPages = Math.ceil(courses.length / cursosPerPage);
-
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
@@ -62,9 +97,9 @@ const ListCourse = () => {
                     </td>
                     <td className="px-4 py-3 text-center">{course.code}</td>
                     <td className="px-4 py-3 text-center">
-                      <Link to={`/director/microcurriculo/${course.id}`} className="text-blue-500 hover:underline">
-                        Ver
-                      </Link>
+                      <button onClick={() => handleDownloadMicrocurriculum(course.id)} className="text-blue-500 hover:underline">
+                        Descargar
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <Link to={`/director/edit-course/${course.id}`} state={{ course }}>
