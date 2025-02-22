@@ -64,10 +64,11 @@ const TeacherView = () => {
             document.body.removeChild(link);
         } catch (error) {
             console.error("Error downloading microcurriculum:", error);
-            setErrorAlert({ error: true, message: error.response?.data || "Error al crear el curso" });
-
-        }
-    };
+            setErrorAlert({ error: true, message: error.response?.data || "Error al crear el curso" });}
+            setTimeout(() => {
+                setErrorAlert({ error: false, message: "" });
+            } , 3000);
+}
 
     const indexOfLastAssignment = currentPage * assignmentsPerPage;
     const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage;

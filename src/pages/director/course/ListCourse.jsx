@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../../axios/Axios';
 import { MdEdit } from "react-icons/md";
 import { Link } from 'react-router-dom';
+import ErrorAlert from '../../../components/alerts/ErrorAlert';
 
 const ListCourse = () => {
   const [courses, setCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCurso, setSelectedCurso] = useState(null);
   const cursosPerPage = 5;
+  const [errorAlert, setErrorAlert] = useState({ error: false, message: "" });
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -53,6 +55,8 @@ const ListCourse = () => {
 
     } catch (error) {
       console.error("Error downloading microcurriculum:", error);
+      setErrorAlert({ error: true, message: error.response?.data || "Error al descargar el microcurrículo" });
+      setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
     }
   };
 
@@ -68,6 +72,7 @@ const ListCourse = () => {
         Listado de Cursos
       </h2>
 
+      {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
       {courses.length === 0 ? (
         <p className="text-center text-gray-500">No hay cursos registrados.</p>
       ) : (

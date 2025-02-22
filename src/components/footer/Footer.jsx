@@ -7,10 +7,9 @@ const Footer = () => {
             <div className="container mx-auto flex justify-between items-center px-4">
                 <p className="text-sm">&copy; {new Date().getFullYear()} UFPS. Todos los derechos reservados.</p>
                 <div className="flex space-x-4">
-                    <a href="#" className="text-white hover:text-white transition"><FaFacebook size={20} /></a>
-                    <a href="#" className="text-white hover:text-white transition"><FaInstagram size={20} /></a>
+                    
                     <a href="#" className="text-white hover:text-white transition"><FaEnvelope size={20} /></a>
-                    <a href="#" className="text-white hover:text-white transition"><FaGlobe size={20} /></a>
+
                 </div>
             </div>
         </footer>

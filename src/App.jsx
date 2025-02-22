@@ -103,7 +103,7 @@ function App() {
                 <Route path='teacher' element={<PrivateRouteTeacher isAuthenticated={isAuthenticated} />}>
                   <Route index element={<TeacherView />} />
                   <Route path='profile-teacher' element={<ProfileTeacher />} />
-                  <Route path='profile-teacher/update-profile-techar' element={<UpdateProfileTeacher />} />
+                  <Route path='profile-teacher/update-profile-teacher' element={<UpdateProfileTeacher />} />
 
                   <Route path='update-password' element={<UpdatePassword />} />
 

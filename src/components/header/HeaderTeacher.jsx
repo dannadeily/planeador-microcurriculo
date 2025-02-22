@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Axios from "../../axios/Axios";
-import { FaBars, FaUser, FaTimes, FaUserCircle, FaSignOutAlt, FaCalendarDay, FaBookOpen } from "react-icons/fa";
+import { FaBars, FaUserCircle, FaSignOutAlt, FaBookOpen } from "react-icons/fa";
 import { FaHouseChimney } from "react-icons/fa6";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import SemesterBefore from "../../pages/teacher/SemesterBefore";
 
 const HeaderTeacher = () => {
-  // Semestre activo
+  // Estado para el semestre activo
   const [activeSemester, setActiveSemester] = useState({ id: "", name: "", startDate: "", endDate: "" });
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,7 +14,9 @@ const HeaderTeacher = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Referencias para detectar clics fuera
   const mobileMenuRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
@@ -24,11 +26,14 @@ const HeaderTeacher = () => {
     navigate("/");
   };
 
-  // Cierra solo el menú móvil si se hace clic fuera de él
+  // Cierra el menú móvil al hacer clic fuera de él
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         setIsMobileMenuOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
       }
     };
 
@@ -42,22 +47,15 @@ const HeaderTeacher = () => {
     const getActiveSemester = async () => {
       try {
         const response = await Axios.get("semester/active");
-        const { id, name, startDate, endDate } = response.data;  // Desestructuración de la respuesta
+        const { id, name, startDate, endDate } = response.data;
 
-
-        setActiveSemester({
-          id,
-          name,
-          startDate,
-          endDate
-        });
+        setActiveSemester({ id, name, startDate, endDate });
       } catch (error) {
         console.error(error);
       }
     };
     getActiveSemester();
   }, []);
-
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -68,13 +66,13 @@ const HeaderTeacher = () => {
         </h1>
         <div className="flex items-center space-x-4">
           {/* Menú Usuario */}
-          <div className="relative">
+          <div className="relative" ref={userMenuRef}>
             <button className="text-white flex items-center" onClick={toggleUserMenu}>
               <FaUserCircle size={24} />
             </button>
             {isUserMenuOpen && (
               <ul className="absolute right-0 mt-2 w-40 bg-white text-black rounded-md shadow-lg">
-                <li><Link to="Profile-teacher" className="block px-4 py-2 hover:bg-gray-200">Perfil</Link></li>
+                <li><Link to="profile-teacher" className="block px-4 py-2 hover:bg-gray-200">Perfil</Link></li>
                 <li><Link to="update-password" className="block px-4 py-2 hover:bg-gray-200">Cambiar Contraseña</Link></li>
               </ul>
             )}
@@ -86,12 +84,11 @@ const HeaderTeacher = () => {
         </div>
       </header>
 
-      {/* Sidebar Semestres dentro del Header */}
+      {/* Sidebar Semestres */}
       <div className={`fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-red-500 text-white transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 z-40`}>
         <div className="flex justify-between items-center p-4">
-
           <button onClick={toggleSidebar} className="absolute top-4 right-4 text-white">
-            <FaTimes size={20} />
+            ✖
           </button>
         </div>
         <ul className="mt-4 space-y-4 p-4">

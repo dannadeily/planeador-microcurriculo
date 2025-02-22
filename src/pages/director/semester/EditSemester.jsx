@@ -19,15 +19,9 @@ const EditSemester = () => {
   useEffect(() => {
     const fetchSemesters = async () => {
       try {
-        const response = await axios.get('semester'); // Obtener todos los semestres
-        const foundSemester = response.data.find(sem => sem.id.toString() === id); // Filtrar por ID
-
-        if (foundSemester) {
-          setSemester({
-            name: foundSemester.name,
-            startDate: foundSemester.startDate.split('T')[0], // Ajustar formato de fecha
-            endDate: foundSemester.endDate.split('T')[0]
-          });
+        const response = await axios.get(`semester/id?idSemester=${id}`); // Obtener todos los semestres
+        if (response.data) {
+          setSemester(response.data);
         } else {
           setErrorAlert({ error: true, message: 'Semestre no encontrado' });
         }
