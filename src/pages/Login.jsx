@@ -3,26 +3,22 @@ import Axios from "../axios/Axios";
 import { useNavigate } from "react-router-dom";
 import ErrorAlert from "../components/alerts/ErrorAlert";
 import SuccessAlert from "../components/alerts/SuccessAlert";
-import * as jwt_decode from "jwt-decode";
-// Importación por defecto
-
-
+import { FaEyeSlash } from "react-icons/fa";
+import { IoEyeSharp } from "react-icons/io5";
 
 const decodeToken = (token) => {
     const array = token.split(".");
     const payload = JSON.parse(atob(array[1]));
     return payload;
-}
-
+};
 
 const Login = () => {
     const [user, setUser] = useState({
         institutionalEmail: "",
         password: "",
     });
-
+    const [showPassword, setShowPassword] = useState(false);
     const [errorAlert, setErrorAlert] = useState({ error: false, message: "" });
-
     const navigate = useNavigate();
 
     const handleChange = (event) => {
@@ -45,19 +41,16 @@ const Login = () => {
             });
 
             if (res.status === 200) {
-
                 const accessToken = res.data;
                 localStorage.setItem("token", accessToken);
                 console.log("Token de acceso:", accessToken);
 
-                // Decodificar el token
-                const decodedToken = decodeToken(accessToken);  // Usar jwt_decode
+                const decodedToken = decodeToken(accessToken);
                 console.log("Token decodificado:", decodedToken);
 
-                const role = decodedToken.role; // Extraer el rol desde el token
+                const role = decodedToken.role;
                 console.log("Rol del usuario:", role);
 
-                // Redireccionar según el rol
                 if (role === "DIRECTOR") {
                     navigate("/director");
                 } else if (role === "TEACHER") {
@@ -66,26 +59,27 @@ const Login = () => {
             }
         } catch (error) {
             console.error(error);
-            if (error.response && error.response.data && error.response.data) {
+            if (error.response && error.response.data) {
                 setErrorAlert({ error: true, message: error.response.data });
             }
             setTimeout(() => setErrorAlert({ error: false, message: "" }), 10000);
         }
     };
 
-
     return (
         <>
-            <div className="flex flex-col items-center justify-center">
-                <h2 className="text-xl font-medium text-center mt-4">
-                    Bienvenido al Sistema de Planeador de Actividades
-                </h2>
-            </div>
+            
             <div className="xl:mx-96 lg:mx-60 md:mx-40 sm:mx-20 my-10 bg-white shadow rounded-lg p-10 border-2 border-red-700 shadow-lg shadow-red-400">
                 <form onSubmit={handleSubmit}>
-                    <h1 className="text-lg font-bold text-center text-gray-900 dark:text-red-500">
+                    
+                    <div className="flex flex-col items-center justify-center">
+                <h4 className=" font-medium text-center ">
+                    Bienvenido al Sistema de Planeador de Actividades
+                </h4>
+                <h1 className="text-lg font-bold text-center text-gray-900 dark:text-red-500 mt-4">
                         INICIAR SESIÓN
                     </h1>
+            </div>
                     {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
 
                     <div className="my-5">
@@ -103,19 +97,28 @@ const Login = () => {
                         />
                     </div>
 
-                    <div className="my-5">
+                    <div className="my-5 relative">
                         <label className="uppercase text-gray-600 block font-bold" htmlFor="password">
                             Contraseña
                         </label>
-                        <input
-                            id="password"
-                            type="password"
-                            name="password"
-                            placeholder="Contraseña"
-                            className="w-full mt-3 p-3 border rounded-xl bg-gray-50"
-                            value={user.password}
-                            onChange={handleChange}
-                        />
+                        <div className="relative">
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                placeholder="Contraseña"
+                                className="w-full mt-3 p-3 border rounded-xl bg-gray-50 pr-10"
+                                value={user.password}
+                                onChange={handleChange}
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 flex items-center px-3"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <IoEyeSharp className="w-5 h-5" />}
+                            </button>
+                        </div>
                     </div>
 
                     <input
