@@ -57,6 +57,10 @@ const EditSemester = () => {
     } catch (error) {
       console.error('Error al actualizar el semestre:', error);
       setErrorAlert({ error: true, message: error.response.data });
+      setTimeout(() => {
+        setErrorAlert({ error: false, message: '' });
+      }, 3000);
+       
     }
   };
 

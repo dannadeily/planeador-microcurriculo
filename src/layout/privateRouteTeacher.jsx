@@ -1,49 +1,70 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import HeaderTeacher from "../components/header/HeaderTeacher";
 
-
 const decodeToken = (token) => {
-    const array = token.split(".");
-    const payload = JSON.parse(atob(array[1]));
-    return payload;
-}
+    try {
+        const array = token.split(".");
+        const payload = JSON.parse(atob(array[1]));
+        return payload;
+    } catch (error) {
+        return null;
+    }
+};
 
-const PrivateRouteTeacher= ({ component: Component, ...rest }) => {
-    const checkAuthentication = () => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            // Verificar la fecha de expiración del token
-            const tokenExpiration = localStorage.getItem("tokenExpiration");
-            if (tokenExpiration && new Date(tokenExpiration) < new Date()) {
-                // El token ha expirado, borrarlo y redirigir al usuario a la página de inicio
-                localStorage.removeItem("token");
-                localStorage.removeItem("tokenExpiration");
-                return false;
-            }
+const PrivateRouteTeacher = () => {
+    const navigate = useNavigate();
+    const [token, setToken] = useState(localStorage.getItem("token"));
 
-            // Decodificar el token y obtener el rol
-            const decodedToken = decodeToken(token);
-            const role = decodedToken.role; // Extraer el rol del token
-            if (role !== "TEACHER") {
-                // Si el rol no es DIRECTOR, redirigir al login
-                return false;
-            }
-
-            return true;
+    useEffect(() => {
+        if (!token) {
+            navigate("/");
+            return;
         }
-        return false;
-    };
 
-    const isAuthenticated = checkAuthentication();
+        const checkTokenExpiration = () => {
+            const decodedToken = decodeToken(token);
+            const currentTime = Math.floor(Date.now() / 1000);
 
-    if (!isAuthenticated) {
-        // Si no está autenticado o no tiene el rol adecuado, redirigir a la página de inicio
-        return <Navigate to="/" />;
+            if (!decodedToken || decodedToken.exp < currentTime) {
+                localStorage.removeItem("token");
+                setToken(null); // Actualiza el estado para re-renderizar y redirigir
+                navigate("/");
+            }
+        };
+
+        const interval = setInterval(checkTokenExpiration, 5000); // Verifica cada 5 segundos
+
+        // Escucha cambios en el localStorage para detectar eliminación del token en otra pestaña
+        const handleStorageChange = (event) => {
+            if (event.key === "token" && !event.newValue) {
+                setToken(null);
+                navigate("/");
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, [token, navigate]);
+
+    if (!token) return <Navigate to="/" />;
+
+    // Verificar rol
+    const decodedToken = decodeToken(token);
+    if (!decodedToken || decodedToken.role !== "TEACHER") {
+        return <Navigate to={`/${decodedToken?.role?.toLowerCase() || ""}`} />;
     }
 
-    // Si está autenticado y tiene el rol adecuado, renderizar el componente
-    return <HeaderTeacher />;
+    return (
+        <>
+            <HeaderTeacher />
+            
+        </>
+    );
 };
 
 export default PrivateRouteTeacher;

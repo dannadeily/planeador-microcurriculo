@@ -44,17 +44,28 @@ const HeaderTeacher = () => {
   }, []);
 
   useEffect(() => {
-    const getActiveSemester = async () => {
+    const fetchActiveSemester = async () => {
       try {
         const response = await Axios.get("semester/active");
-        const { id, name, startDate, endDate } = response.data;
 
-        setActiveSemester({ id, name, startDate, endDate });
+        if (response.data && response.data.id) {
+          const { id, name, startDate, endDate } = response.data;
+          setActiveSemester((prev) =>
+            prev.id !== id ? { id, name, startDate, endDate } : prev
+          );
+        } else {
+          // Si no hay semestre activo, actualizar el estado
+          setActiveSemester({ id: "", name: "", startDate: "", endDate: "" });
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Error al obtener el semestre activo:", error);
+        setActiveSemester({ id: "", name: "", startDate: "", endDate: "" }); // Reiniciar en caso de error
       }
     };
-    getActiveSemester();
+
+    fetchActiveSemester();
+    const interval = setInterval(fetchActiveSemester, 30000); // Actualizar cada 30 segundos
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -62,7 +73,7 @@ const HeaderTeacher = () => {
       {/* Header */}
       <header className="bg-red-500 p-5 fixed top-0 left-0 w-full z-50 flex justify-between items-center h-16">
         <h1 className="text-white font-bold text-lg">
-          {activeSemester.name ? `Semestre Activo:  ${activeSemester.name} Fecha Inicio: ${activeSemester.startDate} - Fecha Fin: ${activeSemester.endDate}` : "No Hay Semestre Activo"}
+          {activeSemester.name ? `Semestre Activo:  ${activeSemester.name} Fecha Inicio: ${activeSemester.startDate}  Fecha Fin: ${activeSemester.endDate}` : "No Hay Semestre Activo"}
         </h1>
         <div className="flex items-center space-x-4">
           {/* Menú Usuario */}

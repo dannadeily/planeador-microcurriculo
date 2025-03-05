@@ -64,16 +64,17 @@ const TeacherView = () => {
             document.body.removeChild(link);
         } catch (error) {
             console.error("Error downloading microcurriculum:", error);
-            setErrorAlert({ error: true, message: error.response?.data || "Error al crear el curso" });}
-            setTimeout(() => {
-                setErrorAlert({ error: false, message: "" });
-            } , 3000);
-}
+            setErrorAlert({ error: true, message: error.response?.data || "Error al crear el curso" });
+        }
+        setTimeout(() => {
+            setErrorAlert({ error: false, message: "" });
+        }, 3000);
+    };
 
     const indexOfLastAssignment = currentPage * assignmentsPerPage;
     const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage;
     const currentAssignments = assignments.slice(indexOfFirstAssignment, indexOfLastAssignment);
-    const totalPages = Math.ceil(assignments.length / assignmentsPerPage);
+    const totalPages = Math.max(1, Math.ceil(assignments.length / assignmentsPerPage));
 
     return (
         <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -84,51 +85,72 @@ const TeacherView = () => {
                     </h2>
 
                     {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
+
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
                             <thead className="bg-red-500 text-white">
                                 <tr>
-                                    <th className="px-4 py-3 text-left">Curso</th>
+                                    <th className="px-4 py-3 text-center">Curso</th>
                                     <th className="px-4 py-3 text-center">Planear</th>
                                     <th className="px-4 py-3 text-center">Grupo</th>
                                     <th className="px-4 py-3 text-center">Descargar Microcurrículo</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentAssignments.map((assignment) => (
-                                    <tr key={assignment.id} className="border-t hover:bg-gray-100">
-                                        <td className="px-4 py-3">{assignment.courseName}</td>
-                                        <td className="px-4 py-3 text-center">
-                                            <button className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
-                                                <RiFileEditFill size={20} />
-                                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    Planear
-                                                </span>
-                                            </button>
-                                        </td>
-                                        <td className="px-4 py-3 text-center">{assignment.group}</td>
-                                        <td className="px-4 py-3 text-center">
-                                            <button onClick={() => handleDownloadMicrocurriculum(assignment.courseId)} className="relative text-blue-500 p-2 rounded-md hover:bg-blue-200 transition-all group">
-                                                <FaDownload size={20} />
-                                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    Descargar
-                                                </span>
-                                            </button>
+                                {currentAssignments.length > 0 ? (
+                                    currentAssignments.map((assignment) => (
+                                        <tr key={assignment.id} className="border-t hover:bg-gray-100">
+                                            <td className="px-4 py-3">{assignment.courseName}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <button className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
+                                                    <RiFileEditFill size={20} />
+                                                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        Planear
+                                                    </span>
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">{assignment.group}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <button onClick={() => handleDownloadMicrocurriculum(assignment.courseId)} className="relative text-blue-500 p-2 rounded-md hover:bg-blue-200 transition-all group">
+                                                    <FaDownload size={20} />
+                                                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        Descargar
+                                                    </span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="4" className="text-center py-4 text-gray-500">
+                                            No hay asignaciones disponibles.
                                         </td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>
-                    <div className="flex justify-between items-center mt-4">
-                        <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300" : "bg-red-500 text-white hover:bg-red-700"}`}>
-                            Anterior
-                        </button>
-                        <span>Página {currentPage} de {totalPages}</span>
-                        <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-300" : "bg-red-700 text-white hover:bg-red-800"}`}>
-                            Siguiente
-                        </button>
-                    </div>
+
+                    {/* Paginación */}
+                    {assignments.length > 0 && (
+                        <div className="flex justify-between items-center mt-4">
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
+                            >
+                                Anterior
+                            </button>
+                            <span>Página {currentPage} de {totalPages}</span>
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-red-700 text-white hover:bg-red-800"}`}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    )}
                 </>
             ) : (
                 <div className="flex flex-col items-center justify-center h-[70vh] text-center">

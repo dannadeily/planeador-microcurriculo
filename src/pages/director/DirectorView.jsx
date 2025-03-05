@@ -63,7 +63,7 @@ const DirectorView = () => {
                         <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
                             <thead className="bg-red-500 text-white">
                                 <tr>
-                                    <th className="px-4 py-3 text-left">Curso</th>
+                                    <th className="px-4 py-3 text-center">Curso</th>
                                     <th className="px-4 py-3 text-center">Docente</th>
                                     <th className="px-4 py-3 text-center">Grupo</th>
                                     <th className="px-4 py-3 text-center">Eliminar</th>

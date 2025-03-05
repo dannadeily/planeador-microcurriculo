@@ -23,7 +23,7 @@ const CreateUser = () => {
     const { name, value, type } = e.target;
     setUser((prev) => ({
       ...prev,
-      [name]: type === "radio" ? value : value.trim(),
+      [name]: type === "radio" ? value : value,
     }));
   };
 
