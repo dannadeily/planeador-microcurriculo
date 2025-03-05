@@ -48,6 +48,7 @@ const UpdateProfileTeacher = () => {
 
             // Mostrar la alerta de éxito
             setSuccessAlert({ success: true, message: 'Datos actualizados correctamente' });
+            setUser({ name: '', personalEmail: '', phone: '', code: '' }); // Limpiar el formulario de edición
 
             // Esperar un momento para mostrar la alerta antes de redirigir
             setTimeout(() => {

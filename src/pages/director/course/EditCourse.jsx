@@ -55,16 +55,28 @@ const EditCourse = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+  
     if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        setCourse((prev) => ({
-          ...prev,
-          fileContent: reader.result,
-          fileType: file.type,
-        }));
+      const allowedTypes = {
+        "application/pdf": "pdf",
+        "application/msword": "word",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "word",
       };
+  
+      if (allowedTypes[file.type]) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+          setCourse((prev) => ({
+            ...prev,
+            fileContent: reader.result,
+            fileType: allowedTypes[file.type], // "pdf" o "word"
+          }));
+        };
+      } else {
+        alert("Solo se permiten archivos PDF o Word (.doc, .docx)");
+        e.target.value = ""; // Limpiar el input
+      }
     }
   };
 

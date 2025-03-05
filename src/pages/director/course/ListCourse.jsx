@@ -81,7 +81,7 @@ const ListCourse = () => {
             <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
               <thead className="bg-red-500 text-white">
                 <tr>
-                  <th className="px-4 py-3 text-left">Nombre del Curso</th>
+                  <th className="px-4 py-3 text-center">Nombre del Curso</th>
                   <th className="px-4 py-3 text-center">Descripción del Curso</th>
                   <th className="px-4 py-3 text-center">Código del Curso</th>
                   <th className="px-4 py-3 text-center">Ver Microcurrículo</th>

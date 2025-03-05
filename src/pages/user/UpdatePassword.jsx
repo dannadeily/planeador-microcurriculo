@@ -62,7 +62,7 @@ const UpdatePassword = () => {
             setPasswords({ actualPassword: '', newPassword: '', newPasswordConfirmation: '' });
 
             setTimeout(() => {
-                navigate("/director");
+                navigate("/teacher");
             }, 3000);
         } catch (error) {
             setErrorAlert({
@@ -109,7 +109,7 @@ const UpdatePassword = () => {
                 <div className="flex justify-end space-x-4">
                     <button
                         type="button"
-                        onClick={() => navigate("/director")}
+                        onClick={() => navigate("/teacher")}
                         className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700"
                     >
                         Cancelar

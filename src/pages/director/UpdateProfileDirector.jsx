@@ -48,6 +48,7 @@ const UpdateProfileDirector = () => {
 
       // Mostrar la alerta de éxito
       setSuccessAlert({ success: true, message: 'Datos actualizados correctamente' });
+      setUser({ name: '', personalEmail: '', phone: '', code: '' }); // Limpiar el formulario de edición
 
       // Esperar un momento para mostrar la alerta antes de redirigir
       setTimeout(() => {
@@ -55,7 +56,8 @@ const UpdateProfileDirector = () => {
       }, 2000);
     } catch (error) {
       console.error('Error al actualizar los datos', error);
-      setErrorAlert({ error: true, message: 'No se pudieron actualizar los datos.' });
+      setErrorAlert({ error: true, message: error.response?.data || "No se pudieron actualizar datos" });
+      setTimeout(() => setErrorAlert({ error: false, message: '' }), 3000);
     }
   };
 

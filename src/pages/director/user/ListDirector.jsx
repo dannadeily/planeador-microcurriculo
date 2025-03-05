@@ -36,11 +36,7 @@ const ListDirector = () => {
         Lista de Directores Registrados
       </h2>
       
-      {loading ? (
-        <p className="text-center text-gray-500">Cargando...</p>
-      ) : error ? (
-        <ErrorAlert message={error} />
-      ) : directors.length === 0 ? (
+      { directors.length === 0 ? (
         <p className="text-center text-gray-500">No hay directores registrados.</p>
       ) : (
         <>
@@ -53,7 +49,6 @@ const ListDirector = () => {
                   <th className="px-4 py-3 text-center">Correo Personal</th>
                   <th className="px-4 py-3 text-center">Teléfono</th>
                   <th className="px-4 py-3 text-center">Código</th>
-                 
                 </tr>
               </thead>
               <tbody>
@@ -64,7 +59,6 @@ const ListDirector = () => {
                     <td className="px-4 py-3 text-center">{docente.personalEmail || "N/A"}</td>
                     <td className="px-4 py-3 text-center">{docente.phone || "N/A"}</td>
                     <td className="px-4 py-3 text-center">{docente.code || "N/A"}</td>
-                    
                   </tr>
                 ))}
               </tbody>

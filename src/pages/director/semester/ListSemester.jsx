@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 const ListSemester = () => {
   const [semestres, setSemestres] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const semestresPerPage = 5;
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const ListSemester = () => {
             <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
               <thead className="bg-red-500 text-white">
                 <tr>
-                  <th className="px-4 py-3 text-left">Nombre del Semestre</th>
+                  <th className="px-4 py-3 text-center">Nombre del Semestre</th>
                   <th className="px-4 py-3 text-center">Fecha de Inicio</th>
                   <th className="px-4 py-3 text-center">Fecha de Fin</th>
                   <th className="px-4 py-3 text-center">Acciones</th>

@@ -36,11 +36,7 @@ const ListTeacher = () => {
         Lista de Docentes Registrados
       </h2>
       
-      {loading ? (
-        <p className="text-center text-gray-500">Cargando...</p>
-      ) : error ? (
-        <ErrorAlert message={error} />
-      ) : teachers.length === 0 ? (
+      {teachers.length === 0 ? (
         <p className="text-center text-gray-500">No hay docentes registrados.</p>
       ) : (
         <>
@@ -48,7 +44,7 @@ const ListTeacher = () => {
             <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
               <thead className="bg-red-500 text-white">
                 <tr>
-                  <th className="px-4 py-3 text-left">Correo Institucional</th>
+                  <th className="px-4 py-3 text-center">Correo Institucional</th>
                   <th className="px-4 py-3 text-center">Nombre</th>
                   <th className="px-4 py-3 text-center">Correo Personal</th>
                   <th className="px-4 py-3 text-center">Teléfono</th>
