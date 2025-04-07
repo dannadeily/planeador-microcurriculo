@@ -145,11 +145,8 @@ const CreateVersion = () => {
             });
         } catch (error) {
             console.error("Error al cargar la versión:", error);
-<<<<<<< HEAD
-            setErrorAlert({ error: true, message: "Error al cargar la versión seleccionada " });
-=======
+
             setErrorAlert({ error: true, message: "Error al cargar la versión seleccionada" });
->>>>>>> HU20-HU21-HU22-HU23
         }
 
         setTimeout(() => {
