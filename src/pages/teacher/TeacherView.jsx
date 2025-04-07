@@ -3,6 +3,7 @@ import Axios from "../../axios/Axios";
 import { FaDownload } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import ErrorAlert from "../../components/alerts/ErrorAlert";
+import { Link } from "react-router-dom";
 
 const TeacherView = () => {
     const [assignments, setAssignments] = useState([]);
@@ -102,12 +103,15 @@ const TeacherView = () => {
                                         <tr key={assignment.id} className="border-t hover:bg-gray-100">
                                             <td className="px-4 py-3">{assignment.courseName}</td>
                                             <td className="px-4 py-3 text-center">
-                                                <button className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
-                                                    <RiFileEditFill size={20} />
-                                                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        Planear
-                                                    </span>
-                                                </button>
+                                                <Link to={`/teacher/planner-teacher?courseId=${assignment.courseId}`}
+                                                    className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
+                                                    <button className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
+                                                        <RiFileEditFill size={20} />
+                                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            Planear
+                                                        </span>
+                                                    </button>
+                                                </Link>
                                             </td>
                                             <td className="px-4 py-3 text-center">{assignment.group}</td>
                                             <td className="px-4 py-3 text-center">

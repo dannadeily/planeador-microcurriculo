@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../axios/Axios';
+import { Link } from 'react-router-dom';
 
 const SemesterBefore = () => {
     const [semesters, setSemesters] = useState([]);
@@ -25,12 +26,15 @@ const SemesterBefore = () => {
 
     return (
         <div>
-            
+
             {semesters.length > 0 ? (
                 <ul>
                     {semesters.map((semester) => (
                         <li key={semester.id} style={{ marginBottom: '10px', borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>
-                            {semester.name}
+                            <Link to="planner-semester-before" className="text-blue-500 hover:underline">
+                                {semester.name}
+                            </Link>
+
                         </li>
                     ))}
                 </ul>

@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { MdDeleteForever } from "react-icons/md";
+import { MdDeleteForever, MdSearch } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Axios from "../../axios/Axios";
 
 const DirectorView = () => {
     const [assignments, setAssignments] = useState([]);
     const [isSemesterActive, setIsSemesterActive] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);  // Ahora empieza en 1
+    const [currentPage, setCurrentPage] = useState(1);
     const assignmentsPerPage = 5;
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const getActiveSemester = async () => {
@@ -47,10 +48,25 @@ const DirectorView = () => {
         }
     };
 
+    const normalizeText = (text) => {
+        return text
+            .normalize("NFD")
+            .replace(/\p{Diacritic}/gu, "")
+            .replace(/\s+/g, "")
+            .toLowerCase();
+    };
+
+    const filteredAssignments = assignments.filter((assignment) => {
+        return (
+            normalizeText(assignment.teacherName).includes(normalizeText(searchTerm)) ||
+            normalizeText(assignment.courseName).includes(normalizeText(searchTerm))
+        );
+    });
+
     const indexOfLastAssignment = currentPage * assignmentsPerPage;
     const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage;
-    const currentAssignments = assignments.slice(indexOfFirstAssignment, indexOfLastAssignment);
-    const totalPages = Math.ceil(assignments.length / assignmentsPerPage);
+    const currentAssignments = filteredAssignments.slice(indexOfFirstAssignment, indexOfLastAssignment);
+    const totalPages = Math.ceil(filteredAssignments.length / assignmentsPerPage);
 
     return (
         <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -59,6 +75,16 @@ const DirectorView = () => {
                     <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
                         Asignaciones Activas
                     </h2>
+                    <div className="relative mb-4">
+                        <input
+                            type="text"
+                            placeholder="Buscar por docente o curso"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="px-4 py-2 border rounded-lg w-full pl-10"
+                        />
+                        <MdSearch className="absolute left-3 top-3 text-gray-500" size={20} />
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
                             <thead className="bg-red-500 text-white">
@@ -66,6 +92,7 @@ const DirectorView = () => {
                                     <th className="px-4 py-3 text-center">Curso</th>
                                     <th className="px-4 py-3 text-center">Docente</th>
                                     <th className="px-4 py-3 text-center">Grupo</th>
+                                    <th className="px-4 py-3 text-center">Planeador</th>
                                     <th className="px-4 py-3 text-center">Eliminar</th>
                                 </tr>
                             </thead>
@@ -75,6 +102,14 @@ const DirectorView = () => {
                                         <td className="px-4 py-3">{assignment.courseName}</td>
                                         <td className="px-4 py-3 text-center">{assignment.teacherName}</td>
                                         <td className="px-4 py-3 text-center">{assignment.group}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <Link to="/director/see-planner">
+
+                                                <button className=" text-blue-600 px-4 py-2 hover:text-blue-900 transition-all">
+                                                    Planeador
+                                                </button>
+                                            </Link>
+                                        </td>
                                         <td className="px-4 py-3 text-center">
                                             <button
                                                 onClick={() => handleDelete(assignment.id)}
@@ -90,7 +125,7 @@ const DirectorView = () => {
                     </div>
                     <div className="flex justify-between items-center mt-4">
                         <button
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}  // Mínimo 1
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
                             className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-300" : "bg-red-500 text-white hover:bg-red-700"}`}
                         >
@@ -98,7 +133,7 @@ const DirectorView = () => {
                         </button>
                         <span>Página {currentPage} de {totalPages}</span>
                         <button
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}  // Máximo totalPages
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}
                             className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-300" : "bg-red-700 text-white hover:bg-red-800"}`}
                         >
