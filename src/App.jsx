@@ -18,11 +18,18 @@ import ProfileDirector from './pages/director/ProfileDirector'
 import UpdateProfileDirector from './pages/director/UpdateProfileDirector'
 import DirectorView from './pages/director/DirectorView'
 import AssignTeacher from './pages/director/AssignTeacher'
+import CreateVersion from './pages/director/planner/CreateVersion'
+import ListVersion from './pages/director/planner/ListVersion'
+import GenerateReport from './pages/director/planner/GenerateReport'
+import SeePlanner from './pages/director/planner/SeePlanner'
+
 
 // Profesor
 import TeacherView from './pages/teacher/TeacherView'
 import UpdateProfileTeacher from './pages/teacher/UpdateProfileTeacher'
 import ProfileTeacher from './pages/teacher/ProfilerTeacher'
+import PlannerTeacher from './pages/teacher/PlannerTeacher'
+import PlannerSemesterBefore from './pages/teacher/plannerSemesterBefore'
 
 // Rutas privadas
 import PrivateRouteDirector from './layout/PrivateRouteDirector'
@@ -69,6 +76,10 @@ function App() {
               <Route path="profile-director" element={<ProfileDirector />} />
               <Route path="profile-director/update-profile-director" element={<UpdateProfileDirector />} />
               <Route path="update-password" element={<UpdatePassword />} />
+              <Route path='create-version' element={<CreateVersion />} />
+              <Route path='list-version' element={<ListVersion />} />
+              <Route path='generate-report' element={<GenerateReport />} />
+              <Route path='see-planner' element={<SeePlanner />} />
               <Route path="*" element={<NotFoundDirector />} />
             </Route>
 
@@ -78,6 +89,8 @@ function App() {
               <Route path="profile-teacher" element={<ProfileTeacher />} />
               <Route path="profile-teacher/update-profile-teacher" element={<UpdateProfileTeacher />} />
               <Route path="update-password" element={<UpdatePassword />} />
+              <Route path='planner-teacher' element={<PlannerTeacher />} />
+              <Route path='planner-semester-before' element={<PlannerSemesterBefore />} />
               <Route path="*" element={<NotFoundTeacher />}
               />
             </Route>
