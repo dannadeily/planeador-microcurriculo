@@ -31,11 +31,7 @@ const CreateVersion = () => {
         }
     }, [planner, initialLoaded, editingItem]);
 
-    useEffect(() => {
-        if (editingItem && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [editingItem]);
+
 
     const handleAddColumn = () => {
         if (editingItem) return;
@@ -187,11 +183,11 @@ const CreateVersion = () => {
                                     <td className="px-4 py-3 text-center">
                                         {editingItem?.id === item.id ? (
                                             <input
-                                                ref={inputRef}
                                                 type="text"
                                                 value={editingItem.name}
                                                 onChange={(e) => handleEditChange(e, "name")}
                                                 className="border p-2 w-full rounded"
+                                                autoFocus={editingItem.name === ""}
                                             />
                                         ) : item.name}
                                     </td>
