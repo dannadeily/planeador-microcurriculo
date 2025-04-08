@@ -14,6 +14,9 @@ const CreateVersion = () => {
     const [showVersionList, setShowVersionList] = useState(false);
     const [availableVersions, setAvailableVersions] = useState([]);
     const [initialLoaded, setInitialLoaded] = useState(false);
+    const [showVersionModal, setShowVersionModal] = useState(false);
+    const [isDefaultVersion, setIsDefaultVersion] = useState(false);
+    const [versionName, setVersionName] = useState("");
     const inputRef = useRef(null);
 
     useEffect(() => {
@@ -74,18 +77,47 @@ const CreateVersion = () => {
     };
 
     const handleGenerateVersion = async () => {
-        if (planner.length === 0 || editingItem) return;
+        if (!versionName.trim()) {
+            setErrorAlert({ error: true, message: "El nombre de la versión es obligatorio." });
+            setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
+            return;
+        }
+
+        const hasEmptyColumns = planner.some(item =>
+            !item.name?.trim() || !item.description?.trim()
+        );
+
+        if (hasEmptyColumns) {
+            setErrorAlert({ error: true, message: "Todas las columnas deben tener nombre y descripción." });
+            setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
+            return;
+        }
+        console.log(planner);
         try {
-            const response = await axios.post("version", { planner });
-            if (response.status === 201) {
+            const response = await axios.post("version", {
+                name: versionName,
+                defaultVersion: isDefaultVersion,
+                columnDefinitions: planner.map(({ name, description }) => ({
+                    name: name.trim(),
+                    description: description.trim()
+                }))
+            });
+
+            if (response.status === 200) {
                 setSuccessAlert({ success: true, message: "Nueva versión generada exitosamente" });
                 localStorage.removeItem("planner");
                 setPlanner([]);
+                setShowVersionModal(false);
+
+                setTimeout(() => {
+                    window.location.href = "/director";
+                }, 2000);
             }
         } catch (error) {
             console.error(error);
             setErrorAlert({ error: true, message: error.response?.data || "Error al generar la nueva versión" });
         }
+
         setTimeout(() => {
             setErrorAlert({ error: false, message: "" });
             setSuccessAlert({ success: false, message: "" });
@@ -149,6 +181,11 @@ const CreateVersion = () => {
             setErrorAlert({ error: false, message: "" });
             setSuccessAlert({ success: false, message: "" });
         }, 5000);
+    };
+
+    const openVersionModal = () => {
+        if (planner.length === 0 || editingItem) return;
+        setShowVersionModal(true);
     };
 
     const indexOfLastItem = currentPage * plannerPerPage;
@@ -247,7 +284,7 @@ const CreateVersion = () => {
                     {showVersionList ? "Ocultar versiones disponibles" : "Cargar desde otra versión"}
                 </button>
                 <button
-                    onClick={handleGenerateVersion}
+                    onClick={openVersionModal}
                     disabled={planner.length === 0 || !!editingItem}
                     className={`px-4 py-2 rounded-md transition-all ${planner.length === 0 || editingItem ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-500 text-white hover:bg-red-700'}`}
                 >
@@ -295,6 +332,47 @@ const CreateVersion = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+            {showVersionModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                        <h3 className="text-xl font-semibold mb-4">Detalles de la Nueva Versión</h3>
+                        <label className="block mb-2 font-medium">Nombre de la versión:</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border rounded mb-4"
+                            value={versionName}
+                            onChange={(e) => setVersionName(e.target.value)}
+                            placeholder="Ej. Planeador Abril 2025"
+                        />
+
+                        <div className="flex items-center mb-4">
+                            <input
+                                type="checkbox"
+                                id="defaultVersion"
+                                checked={isDefaultVersion}
+                                onChange={() => setIsDefaultVersion(prev => !prev)}
+                                className="mr-2"
+                            />
+                            <label htmlFor="defaultVersion">Usar esta versión por defecto</label>
+                        </div>
+
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={() => setShowVersionModal(false)}
+                                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleGenerateVersion}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                            >
+                                Confirmar y Crear
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
