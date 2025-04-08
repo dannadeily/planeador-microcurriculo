@@ -92,7 +92,7 @@ const DirectorView = () => {
                                     <th className="px-4 py-3 text-center">Curso</th>
                                     <th className="px-4 py-3 text-center">Docente</th>
                                     <th className="px-4 py-3 text-center">Grupo</th>
-                                    <th className="px-4 py-3 text-center">Planeador</th>
+                                    <th className="px-4 py-3 text-center">Revisar Planeador</th>
                                     <th className="px-4 py-3 text-center">Eliminar</th>
                                 </tr>
                             </thead>
