@@ -11,7 +11,8 @@ const AssignTeacher = () => {
         courseId: "",
         teacherId: "",
         semesterId: "",
-        group: ""
+        group: "",
+        plannerVersionId: ""
     };
 
     const [assignment, setAssignment] = useState(initialState);
@@ -19,35 +20,55 @@ const AssignTeacher = () => {
     const [successAlert, setSuccessAlert] = useState({ success: false, message: "" });
     const [courses, setCourses] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [groups, setGroups] = useState(["A", "B", "C", "D", "E"]);
+    const [groups] = useState(["A", "B", "C", "D", "E"]);
+    const [defaultVersion, setDefaultVersion] = useState(null);
+    const [otherVersions, setOtherVersions] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await Axios.get('course');
-                const teachersRes = await Axios.get('user/list?profileType=TEACHER');
-                const semesterRes = await Axios.get('semester/active');
+                const [coursesRes, teachersRes, semesterRes, versionsRes] = await Promise.all([
+                    Axios.get('course'),
+                    Axios.get('user/list?profileType=TEACHER'),
+                    Axios.get('semester/active'),
+                    Axios.get('version/list')
+                ]);
 
                 setCourses(coursesRes.data);
                 setTeachers(teachersRes.data);
 
-                setAssignment(prevState => ({
-                    ...prevState,
-                    semesterId: semesterRes.data.id
+                const activeSemesterId = semesterRes.data.id;
+                const versions = versionsRes.data;
+
+                const defaultVer = versions.find(v => v.defaultVersion);
+                const otherVers = versions.filter(v => !v.defaultVersion);
+
+                setDefaultVersion(defaultVer);
+                setOtherVersions(otherVers);
+
+                // Asignar directamente la versión por defecto si no se ha seleccionado aún
+                setAssignment(prev => ({
+                    ...prev,
+                    semesterId: activeSemesterId,
+                    plannerVersionId: defaultVer?.id || ""
                 }));
             } catch (error) {
-                setErrorAlert({ error: true, message: error.response?.data || "Error al obtener cursos y docentes" });
+                setErrorAlert({
+                    error: true,
+                    message: error.response?.data || "Error al obtener información inicial"
+                });
             }
         };
         fetchData();
     }, []);
+
 
     const handleChange = (e) => {
         setAssignment(prevState => ({ ...prevState, [e.target.name]: e.target.value }));
     };
 
     const validateForm = () => {
-        if (!assignment.courseId || !assignment.teacherId || !assignment.group || !assignment.semesterId) {
+        if (!assignment.courseId || !assignment.teacherId || !assignment.group || !assignment.semesterId || !assignment.plannerVersionId) {
             setErrorAlert({ error: true, message: "Todos los campos son obligatorios." });
             setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
             return false;
@@ -63,7 +84,11 @@ const AssignTeacher = () => {
             const res = await Axios.post("/assignment", assignment);
             if (res.status === 200) {
                 setSuccessAlert({ success: true, message: res.data.message || "Asignación creada exitosamente" });
-                setAssignment(prevState => ({ ...initialState, semesterId: prevState.semesterId }));
+                setAssignment(prevState => ({
+                    ...initialState,
+                    semesterId: prevState.semesterId,
+                    plannerVersionId: defaultVersion?.id || ""
+                }));
             }
             setTimeout(() => {
                 navigate('/director');
@@ -131,7 +156,24 @@ const AssignTeacher = () => {
                             ))}
                         </select>
                     </div>
+
+                    <div>
+                        <label className="block text-gray-700">Versión del Planeador</label>
+                        <select
+                            name="plannerVersionId"
+                            value={assignment.plannerVersionId}
+                            onChange={handleChange}
+                            className="border p-3 w-full rounded-md border-gray-300"
+                        >
+                            {[defaultVersion, ...otherVersions].filter(Boolean).map(version => (
+                                <option key={version.id} value={version.id}>
+                                    {version.versionName} {version.defaultVersion ? "(por defecto)" : ""}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
+
 
                 <div className="flex justify-end space-x-4">
                     <button
