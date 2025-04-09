@@ -79,7 +79,7 @@ function App() {
               <Route path='create-version' element={<CreateVersion />} />
               <Route path='list-version' element={<ListVersion />} />
               <Route path='generate-report' element={<GenerateReport />} />
-              <Route path='see-planner' element={<SeePlanner />} />
+              <Route path='see-planner/:assignmentId' element={<SeePlanner />} />
               <Route path="*" element={<NotFoundDirector />} />
             </Route>
 
@@ -90,7 +90,7 @@ function App() {
               <Route path="profile-teacher/update-profile-teacher" element={<UpdateProfileTeacher />} />
               <Route path="update-password" element={<UpdatePassword />} />
               <Route path='planner-teacher' element={<PlannerTeacher />} />
-              <Route path='planner-semester-before' element={<PlannerSemesterBefore />} />
+              <Route path='planner-semester-before/:courseId' element={<PlannerSemesterBefore />} />
               <Route path="*" element={<NotFoundTeacher />}
               />
             </Route>
