@@ -1,136 +1,146 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import ErrorAlert from '../../components/alerts/ErrorAlert';
-import SuccessAlert from '../../components/alerts/SuccessAlert';
-import { MdDeleteForever, MdEdit, MdSave } from "react-icons/md";
+import Axios from '../../axios/Axios';
+import { useParams } from 'react-router-dom';
 
 const PlannerTeacher = () => {
-    const [planner, setPlanner] = useState([]);
-    const [editingItem, setEditingItem] = useState(null);
-    const [errorAlert, setErrorAlert] = useState({ error: false, message: "" });
-    const [successAlert, setSuccessAlert] = useState({ success: false, message: "" });
+    const [planner, setPlanner] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const rowsPerPage = 5;
+    const { courseId: assignmentId } = useParams();
 
     useEffect(() => {
         const fetchPlanner = async () => {
             try {
-                const response = await axios.get("https://tuapi.com/obtener-planeador");
-                setPlanner(response.data.length > 0 ? response.data : []);
-            } catch (error) {
-                console.error("Error al obtener los datos", error);
-                //setErrorAlert({ error: true, message: "Error al cargar la planeación" });
-
+                const response = await Axios.get(`planner?assignmentId=${assignmentId}`);
+                setPlanner(response.data);
+            } catch (err) {
+                console.error("Error fetching planner:", err);
+                setError("Error al cargar el planeador");
+            } finally {
+                setLoading(false);
             }
         };
-        fetchPlanner();
-    }, []);
 
-    const handleAddColumn = () => {
-        if (editingItem) return;
-        const newCol = { id: Date.now(), name: "", description: "", isEditing: true };
-        setPlanner([...planner, newCol]);
-        setEditingItem(newCol);
-    };
-
-    const handleEdit = (item) => {
-        setEditingItem({ ...item });
-    };
-
-    const handleEditChange = (e, field) => {
-        setEditingItem(prev => ({ ...prev, [field]: e.target.value }));
-    };
-
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`https://tuapi.com/eliminar-planeador/${id}`);
-            setPlanner(prevPlanner => prevPlanner.filter(item => item.id !== id));
-            if (editingItem?.id === id) setEditingItem(null);
-        } catch (error) {
-            console.error("Error al eliminar", error);
-            setErrorAlert({ error: true, message: "Error al eliminar la fila" });
+        if (assignmentId) {
+            setLoading(true); // <- reset loading para cuando cambia assignmentId
+            fetchPlanner();
         }
-    };
+    }, [assignmentId]);
 
-    const handleSubmit = async () => {
-        if (!editingItem) return;
-        try {
-            const response = editingItem.id ? 
-                await axios.put(`https://tuapi.com/actualizar-planeador/${editingItem.id}`, editingItem) : 
-                await axios.post("https://tuapi.com/crear-planeador", editingItem);
-            
-            setPlanner(planner.map(item => (item.id === editingItem.id ? response.data : item)));
-            setEditingItem(null);
-            setSuccessAlert({ success: true, message: "Guardado exitosamente" });
-        } catch (error) {
-            console.error(error);
-            setErrorAlert({ error: true, message: "Error al guardar los cambios" });
-        }
-        setTimeout(() => {
-            setErrorAlert({ error: false, message: "" });
-            setSuccessAlert({ success: false, message: "" });
-        }, 5000);
-    };
+    if (loading) {
+        return <div className="text-center text-gray-500">Cargando información...</div>;
+    }
+
+    if (error) {
+        return <div className="text-center text-red-500">{error}</div>;
+    }
+
+    const data = planner?.data || [];
+    const columns = planner?.columns || [];
+    const hasData = data.length > 0;
+
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+    const totalPages = Math.max(Math.ceil(data.length / rowsPerPage), 1);
 
     return (
-        <div className="max-w-8xl mx-auto p-6 bg-white rounded-lg shadow-md">
+        <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md overflow-hidden">
             <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
                 Planeador
             </h2>
-            {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
-            {successAlert.success && <SuccessAlert message={successAlert.message} />}
-            
-            
-            
+
+            <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-4 border border-gray-300">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 border-b border-gray-300 pb-4 text-gray-700">
+                    <p><span className='font-semibold'>Curso:</span> {planner.courseName}</p>
+                    <p><span className='font-semibold'>Docente:</span> {planner.teacherName}</p>
+                    <p><span className='font-semibold'>Grupo:</span> {planner.group}</p>
+                    <p><span className='font-semibold'>Semestre:</span> {planner.semesterName}</p>
+                </div>
+                <div className="mt-2 text-gray-600">
+                    <span className='font-semibold'>Planeador -</span> {planner.versionName}
+                </div>
+            </div>
+
             <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-                    <thead className="bg-red-500 text-white">
+                <table className="w-full border border-gray-300 rounded-lg shadow-sm">
+                    <thead className="bg-red-500 text-white text-sm md:text-base">
                         <tr>
-                            <th className="px-3 py-2 text-center">Nombre</th>
-                            <th className="px-3 py-2 text-center">Descripción</th>
-                            <th className="px-4 py-3 text-center">Acción</th>
-                            <th className="px-4 py-3 text-center">Eliminar</th>
+                            {columns.map((col, index) => (
+                                <th key={index} className="px-3 py-2 text-center" title={col.description}>
+                                    {col.name}
+                                </th>
+                            ))}
+                            <th className="px-3 py-2 text-center">Editar</th>
+                            <th className="px-3 py-2 text-center">Eliminar</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {planner.map((item) => (
-                            <tr key={item.id} className="border-t hover:bg-gray-100">
-                                <td className="px-4 py-3 text-center">
-                                    {editingItem?.id === item.id ? (
-                                        <input type="text" value={editingItem.name} onChange={(e) => handleEditChange(e, "name")} className="border p-2 w-full rounded" />
-                                    ) : item.name}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    {editingItem?.id === item.id ? (
-                                        <input type="text" value={editingItem.description} onChange={(e) => handleEditChange(e, "description")} className="border p-2 w-full rounded" />
-                                    ) : item.description}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    {editingItem?.id === item.id ? (
-                                        <button onClick={handleSubmit} className="text-green-600 p-2 rounded-md hover:bg-green-200 transition-all">
-                                            <MdSave size={20} />
-                                        </button>
-                                    ) : (
-                                        <button onClick={() => handleEdit(item)} className="text-blue-600 p-2 rounded-md hover:bg-blue-200 transition-all">
-                                            <MdEdit size={20} />
-                                        </button>
-                                    )}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    <button onClick={() => handleDelete(item.id)} className="text-red-600 p-2 rounded-md hover:bg-red-200 transition-all">
-                                        <MdDeleteForever size={20} />
-                                    </button>
+                        {!hasData ? (
+                            <tr>
+                                <td colSpan={columns.length + 2} className="px-3 py-4 text-center text-gray-500">
+                                    No hay datos registrados en el planeador.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            currentRows.map((row, rowIndex) => (
+                                <tr key={rowIndex} className="border-t hover:bg-gray-100 text-xs md:text-sm">
+                                    {row.map((cell, cellIndex) => (
+                                        <td key={cellIndex} className="px-3 py-2 text-center">
+                                            {cell || '-'}
+                                        </td>
+                                    ))}
+                                    <td className="px-3 py-2 text-center">
+                                        <button className="text-blue-600 hover:underline">Editar</button>
+                                    </td>
+                                    <td className="px-3 py-2 text-center">
+                                        <button className="text-red-600 hover:underline">Eliminar</button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
 
-            <div className="flex flex-col items-center mt-6 space-y-3">
-                <button onClick={handleAddColumn} disabled={!!editingItem} className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700 transition-all">
-                    Nueva Planeación
+            <div className="flex justify-center items-center mt-4 space-x-4">
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-md transition-all ${currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
+                >
+                    Anterior
                 </button>
-                <button disabled={planner.length > 0} className={`px-4 py-2 rounded-md transition-all ${planner.length > 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-500 text-white hover:bg-red-700'}`}>Cargar desde Semestre Anterior</button>
-                <button disabled={planner.length > 0} className={`px-4 py-2 rounded-md transition-all ${planner.length > 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-500 text-white hover:bg-red-700'}`}>Cargar desde Grupo Activo</button>
+                <span className="text-gray-700">Página {currentPage} de {totalPages}</span>
+                <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-md transition-all ${currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
+                >
+                    Siguiente
+                </button>
+            </div>
+
+            <div className="flex flex-col items-center mt-6 space-y-3">
+                <button className="px-4 py-2 rounded-md transition-all bg-red-500 text-white hover:bg-red-700">
+                    Nueva planeación
+                </button>
+
+                <button
+                    disabled={hasData}
+                    className={`px-4 py-2 rounded-md transition-all ${hasData ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
+                >
+                    Cargar desde semestre anterior
+                </button>
+
+                <button
+                    disabled={hasData}
+                    className={`px-4 py-2 rounded-md transition-all ${hasData ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
+                >
+                    Cargar desde grupo activo
+                </button>
             </div>
         </div>
     );

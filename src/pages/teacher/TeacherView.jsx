@@ -103,7 +103,7 @@ const TeacherView = () => {
                                         <tr key={assignment.id} className="border-t hover:bg-gray-100">
                                             <td className="px-4 py-3">{assignment.courseName}</td>
                                             <td className="px-4 py-3 text-center">
-                                                <Link to={`/teacher/planner-teacher?courseId=${assignment.courseId}`}
+                                                <Link to={`/teacher/planner-teacher/${assignment.id}`}
                                                     className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
                                                     <button className="relative text-green-500 p-2 rounded-md hover:bg-green-200 transition-all group">
                                                         <RiFileEditFill size={20} />

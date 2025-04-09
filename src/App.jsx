@@ -89,7 +89,7 @@ function App() {
               <Route path="profile-teacher" element={<ProfileTeacher />} />
               <Route path="profile-teacher/update-profile-teacher" element={<UpdateProfileTeacher />} />
               <Route path="update-password" element={<UpdatePassword />} />
-              <Route path='planner-teacher' element={<PlannerTeacher />} />
+              <Route path='planner-teacher/:courseId' element={<PlannerTeacher />} />
               <Route path='planner-semester-before/:courseId' element={<PlannerSemesterBefore />} />
               <Route path="*" element={<NotFoundTeacher />}
               />
