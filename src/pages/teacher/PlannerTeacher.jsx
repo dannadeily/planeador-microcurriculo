@@ -92,6 +92,14 @@ const PlannerTeacher = () => {
                 const res = await Axios.get(`planner?assignmentId=${assignmentId}`);
                 setPlanner(res.data);
                 setNewRow(null);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Guardado',
+                    text: 'La planeación fue guardada exitosamente.',
+
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
             }
         } catch (error) {
             console.error("Error al guardar:", error);
@@ -101,6 +109,10 @@ const PlannerTeacher = () => {
                 text: error.response?.data?.message || 'Ocurrió un error al guardar la planeación.',
             });
         }
+    };
+
+    const handleCancelNewRow = () => {
+        setNewRow(null);
     };
 
     // Function to handle row edit
@@ -153,6 +165,13 @@ const PlannerTeacher = () => {
                 await fetchPlanner();
                 setEditingRowIndex(null);
                 setEditingRowData(null);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Actualizado',
+                    text: 'La planeación fue actualizada exitosamente.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
             } else {
                 console.warn("Respuesta inesperada del servidor:", response);
             }
@@ -163,6 +182,51 @@ const PlannerTeacher = () => {
                 icon: 'error',
                 title: 'Error',
                 text: error.response?.data?.message || 'Ocurrió un error al guardar los cambios.',
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Function to handle row deletion
+
+    const handleDeleteRow = async (rowIndex) => {
+        const absoluteIndex = indexOfFirstRow + rowIndex;
+
+        const confirm = await Swal.fire({
+            title: '¿Eliminar planeación?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        try {
+            setSaving(true);
+
+            const response = await Axios.delete(`planner?plannerId=${assignmentId}&rowPosition=${absoluteIndex}`);
+
+            if (response.status === 200 || response.status === 204) {
+                await fetchPlanner();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Eliminado',
+                    text: 'La planeación fue eliminada exitosamente.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            } else {
+                console.warn("Respuesta inesperada al eliminar:", response);
+            }
+        } catch (error) {
+            console.error("Error al eliminar:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data?.message || 'No se pudo eliminar la planeación.',
             });
         } finally {
             setSaving(false);
@@ -223,7 +287,16 @@ const PlannerTeacher = () => {
                                         <MdSave />
                                     </button>
                                 </td>
-                                <td className="px-3 py-2 text-center text-gray-400">-</td>
+                                <td className="px-3 py-2 text-center">
+                                    <button
+                                        onClick={handleCancelNewRow}
+                                        disabled={saving}
+                                        className="text-red-600 p-2 rounded-md hover:bg-red-200 transition-all"
+                                        title="Cancelar"
+                                    >
+                                        <MdDeleteForever />
+                                    </button>
+                                </td>
                             </tr>
                         )}
 
@@ -276,11 +349,13 @@ const PlannerTeacher = () => {
                                         </td>
                                         <td className="px-3 py-2 text-center">
                                             <button
+                                                onClick={() => handleDeleteRow(rowIndex)}
                                                 disabled={newRow || saving || editingRowIndex !== null}
                                                 className="text-red-600 p-2 rounded-md hover:bg-red-200 transition-all"
                                             >
                                                 <MdDeleteForever />
                                             </button>
+
                                         </td>
                                     </tr>
                                 );
