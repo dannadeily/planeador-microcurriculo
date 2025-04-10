@@ -15,6 +15,8 @@ const PlannerTeacher = () => {
     const [editingRowIndex, setEditingRowIndex] = useState(null);
     const [compatiblePlanners, setCompatiblePlanners] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [groupCompatiblePlanners, setGroupCompatiblePlanners] = useState([]);
+    const [showGroupModal, setShowGroupModal] = useState(false);
 
     const rowsPerPage = 5;
     const { courseId: assignmentId } = useParams();
@@ -252,6 +254,22 @@ const PlannerTeacher = () => {
         }
     };
 
+    // Function to handle loading data from active group
+
+    const handleLoadFromActiveGroup = async () => {
+        try {
+            const response = await Axios.get(`planner/compatible/group?plannerId=${assignmentId}`);
+            setGroupCompatiblePlanners(response.data); // Se espera que sea una lista de objetos con info del grupo
+            setShowGroupModal(true);
+        } catch (error) {
+            console.error("Error al obtener planeaciones de grupo activo:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron obtener las planeaciones compatibles de otros grupos.',
+            });
+        }
+    };
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md overflow-hidden">
             <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
@@ -420,6 +438,7 @@ const PlannerTeacher = () => {
                 </button>
 
                 <button
+                    onClick={handleLoadFromActiveGroup}
                     disabled={hasData || newRow}
                     className={`px-4 py-2 rounded-md transition-all ${hasData || newRow ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
                 >
@@ -492,6 +511,69 @@ const PlannerTeacher = () => {
                     </div>
                 </div>
             )}
+
+            {showGroupModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
+                        <h3 className="text-xl font-semibold mb-4 text-center">Selecciona un grupo compatible</h3>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {groupCompatiblePlanners.length > 0 ? (
+                                groupCompatiblePlanners.map((groupItem, idx) => (
+                                    <div
+                                        key={groupItem.groupId || idx}
+                                        className="border p-3 rounded hover:bg-gray-100 cursor-pointer transition"
+                                        onClick={async () => {
+                                            const confirm = await Swal.fire({
+                                                title: '¿Cargar esta planeación?',
+                                                text: `Grupo: ${groupItem.group}`,
+                                                icon: 'question',
+                                                showCancelButton: true,
+                                                confirmButtonText: 'Sí, cargar',
+                                                cancelButtonText: 'Cancelar',
+                                            });
+
+                                            if (!confirm.isConfirmed) return;
+
+                                            try {
+                                                const result = await Axios.get(`planner?plannerId=${groupItem.plannerId}`);
+                                                localStorage.setItem('plannerData', JSON.stringify(result.data));
+                                                setPlanner(result.data);
+                                                setShowGroupModal(false);
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: 'Planeación cargada',
+                                                    timer: 1500,
+                                                    showConfirmButton: false,
+                                                });
+                                            } catch (error) {
+                                                console.error("Error al cargar planeación del grupo:", error);
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: 'Error',
+                                                    text: 'No se pudo cargar la planeación del grupo seleccionado.',
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <p><strong>Grupo:</strong> {groupItem.group}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 text-center">No hay grupos compatibles.</p>
+                            )}
+                        </div>
+                        <div className="mt-4 text-right">
+                            <button
+                                onClick={() => setShowGroupModal(false)}
+                                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
