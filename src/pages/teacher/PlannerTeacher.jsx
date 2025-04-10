@@ -13,6 +13,8 @@ const PlannerTeacher = () => {
     const [saving, setSaving] = useState(false);
     const [editingRowData, setEditingRowData] = useState(null);
     const [editingRowIndex, setEditingRowIndex] = useState(null);
+    const [compatiblePlanners, setCompatiblePlanners] = useState([]);
+    const [showModal, setShowModal] = useState(false);
 
     const rowsPerPage = 5;
     const { courseId: assignmentId } = useParams();
@@ -233,6 +235,23 @@ const PlannerTeacher = () => {
         }
     };
 
+    // Function to handle loading data from previous semester
+    const handleLoadFromPreviousSemester = async () => {
+        try {
+            const response = await Axios.get(`planner/compatible/old?plannerId=${assignmentId}`);
+            console.log("Response from previous semester:", response.data); // Debug
+            setCompatiblePlanners(response.data); // Asumiendo que es un array de objetos con los campos necesarios
+            setShowModal(true);
+        } catch (error) {
+            console.error("Error al obtener planeaciones anteriores:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo cargar la información del semestre anterior.',
+            });
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md overflow-hidden">
             <h2 className="text-2xl font-semibold mb-6 text-center uppercase border-b-2 border-red-500 shadow-md">
@@ -393,6 +412,7 @@ const PlannerTeacher = () => {
                 </button>
 
                 <button
+                    onClick={handleLoadFromPreviousSemester}
                     disabled={hasData || newRow}
                     className={`px-4 py-2 rounded-md transition-all ${hasData || newRow ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-700"}`}
                 >
@@ -406,6 +426,72 @@ const PlannerTeacher = () => {
                     Cargar desde grupo activo
                 </button>
             </div>
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-xl w-full shadow-lg">
+                        <h3 className="text-xl font-bold mb-4 text-center">Selecciona una planeación del semestre anterior</h3>
+                        <div className="max-h-64 overflow-y-auto">
+                            {compatiblePlanners.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {compatiblePlanners.map((plannerItem, idx) => (
+                                        <li
+                                            key={plannerItem.id}
+                                            className="border p-3 rounded-md hover:bg-gray-100 cursor-pointer transition"
+                                            onClick={async () => {
+                                                const confirm = await Swal.fire({
+                                                    title: '¿Cargar esta planeación?',
+                                                    text: `Docente: ${plannerItem.teacherName} | Grupo: ${plannerItem.group} | Semestre: ${plannerItem.semester}`,
+                                                    icon: 'question',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: 'Sí, cargar',
+                                                    cancelButtonText: 'Cancelar',
+                                                });
+
+                                                if (!confirm.isConfirmed) return;
+
+                                                try {
+                                                    const response = await Axios.get(`planner?versionId=${plannerItem.versionId}`);
+                                                    localStorage.setItem('plannerData', JSON.stringify(response.data));
+                                                    setPlanner(response.data);
+                                                    setShowModal(false);
+                                                    Swal.fire({
+                                                        icon: 'success',
+                                                        title: 'Cargado',
+                                                        text: 'La planeación fue cargada exitosamente.',
+                                                        timer: 2000,
+                                                        showConfirmButton: false,
+                                                    });
+                                                } catch (error) {
+                                                    console.error("Error al cargar planeación:", error);
+                                                    Swal.fire({
+                                                        icon: 'error',
+                                                        title: 'Error',
+                                                        text: 'No se pudo cargar la planeación seleccionada.',
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <p><strong>Docente:</strong> {plannerItem.teacherName}</p>
+                                            <p><strong>Grupo:</strong> {plannerItem.group}</p>
+                                            <p><strong>Semestre:</strong> {plannerItem.semester}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-gray-500 text-center">No hay planeaciones disponibles.</p>
+                            )}
+                        </div>
+                        <div className="mt-4 text-right">
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
