@@ -11,7 +11,7 @@ const PlannerTeacher = () => {
     const [error, setError] = useState(null);
     const [newRow, setNewRow] = useState(null);
     const [saving, setSaving] = useState(false);
-    const [newRowData, setNewRowData] = useState([]);
+    const [editingRowData, setEditingRowData] = useState(null);
     const [editingRowIndex, setEditingRowIndex] = useState(null);
 
     const rowsPerPage = 5;
@@ -80,13 +80,13 @@ const PlannerTeacher = () => {
         if (!confirm.isConfirmed) return;
 
         try {
-            
+
             const response = await Axios.post("planner", {
                 plannerId: parseInt(assignmentId),
-                
+
                 data: newRow.map(cell => cell.trim())
             });
-            
+
 
             if (response.status === 200) {
                 const res = await Axios.get(`planner?assignmentId=${assignmentId}`);
@@ -103,6 +103,71 @@ const PlannerTeacher = () => {
         }
     };
 
+    // Function to handle row edit
+    const handleEditRow = (rowIndex) => {
+        const absoluteIndex = indexOfFirstRow + rowIndex;
+        setEditingRowIndex(absoluteIndex);
+        setEditingRowData([...data[absoluteIndex]]);
+    };
+
+    const handleChangeEditCell = (index, value) => {
+        const updated = [...editingRowData];
+        updated[index] = value;
+        setEditingRowData(updated);
+    };
+
+    const handleSaveEditRow = async () => {
+        if (!editingRowData.every(cell => cell.trim() !== '')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos vacíos',
+                text: 'Por favor completa todos los campos antes de guardar.',
+            });
+            return;
+        }
+
+        const confirm = await Swal.fire({
+            title: '¿Guardar cambios?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar',
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        try {
+            setSaving(true);
+
+            const payload = {
+                plannerId: parseInt(assignmentId),
+                rowPosition: editingRowIndex, // <-- Probá con este valor (0-indexed). Cambiar a +1 si el backend lo necesita
+                data: editingRowData.map(cell => cell.trim())
+            };
+
+            console.log("Payload que se enviará:", payload); // Debug
+
+            const response = await Axios.put("planner", payload);
+
+            if (response.status === 200 || response.status === 204) {
+                await fetchPlanner();
+                setEditingRowIndex(null);
+                setEditingRowData(null);
+            } else {
+                console.warn("Respuesta inesperada del servidor:", response);
+            }
+
+        } catch (error) {
+            console.error("Error al actualizar:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data?.message || 'Ocurrió un error al guardar los cambios.',
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md overflow-hidden">
@@ -169,31 +234,57 @@ const PlannerTeacher = () => {
                                 </td>
                             </tr>
                         ) : (
-                            currentRows.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="border-t hover:bg-gray-100 text-xs md:text-sm">
-                                    {row.map((cell, cellIndex) => (
-                                        <td key={cellIndex} className="px-3 py-2 text-center">
-                                            {cell || '-'}
+                            currentRows.map((row, rowIndex) => {
+                                const absoluteIndex = indexOfFirstRow + rowIndex;
+                                const isEditing = absoluteIndex === editingRowIndex;
+
+                                return (
+                                    <tr key={rowIndex} className="border-t hover:bg-gray-100 text-xs md:text-sm">
+                                        {(isEditing ? editingRowData : row).map((cell, cellIndex) => (
+                                            <td key={cellIndex} className="px-3 py-2 text-center">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={cell}
+                                                        onChange={(e) => handleChangeEditCell(cellIndex, e.target.value)}
+                                                        className="w-full border border-gray-300 px-2 py-1 rounded"
+                                                        disabled={saving}
+                                                    />
+                                                ) : (
+                                                    cell || '-'
+                                                )}
+                                            </td>
+                                        ))}
+                                        <td className="px-3 py-2 text-center">
+                                            {isEditing ? (
+                                                <button
+                                                    onClick={handleSaveEditRow}
+                                                    disabled={saving}
+                                                    className="text-green-600 p-2 rounded-md hover:bg-green-200 transition-all"
+                                                >
+                                                    <MdSave />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleEditRow(rowIndex)}
+                                                    disabled={newRow || saving || editingRowIndex !== null}
+                                                    className="text-blue-600 p-2 rounded-md hover:bg-blue-200 transition-all"
+                                                >
+                                                    <MdEdit />
+                                                </button>
+                                            )}
                                         </td>
-                                    ))}
-                                    <td className="px-3 py-2 text-center">
-                                        <button
-                                            disabled={newRow || saving}
-                                            className="text-blue-600 p-2 rounded-md hover:bg-blue-200 transition-all"
-                                        >
-                                            <MdEdit />
-                                        </button>
-                                    </td>
-                                    <td className="px-3 py-2 text-center">
-                                        <button
-                                            disabled={newRow || saving}
-                                            className="text-red-600 p-2 rounded-md hover:bg-red-200 transition-all"
-                                        >
-                                            <MdDeleteForever />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                                        <td className="px-3 py-2 text-center">
+                                            <button
+                                                disabled={newRow || saving || editingRowIndex !== null}
+                                                className="text-red-600 p-2 rounded-md hover:bg-red-200 transition-all"
+                                            >
+                                                <MdDeleteForever />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
