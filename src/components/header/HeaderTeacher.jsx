@@ -69,6 +69,12 @@ const HeaderTeacher = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleSemesterClick = () => {
+    console.log("Click en Semestres Anteriores");
+    setIsSidebarOpen((prev) => !prev);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -125,7 +131,7 @@ const HeaderTeacher = () => {
         <ul className="flex flex-col md:flex-row md:space-x-4 w-full">
           <li><Link to="/teacher" className="p-2 hover:bg-red-500 flex items-center w-full md:w-auto"><FaHouseChimney className="mr-2" /> Inicio</Link></li>
           <li>
-            <button onClick={toggleSidebar} className="p-2 hover:bg-red-500 flex items-center w-full md:w-auto">
+            <button onClick={handleSemesterClick} className="p-2 hover:bg-red-500 flex items-center w-full md:w-auto">
               <FaBookOpen className="mr-2" /> Semestres Anteriores
             </button>
           </li>

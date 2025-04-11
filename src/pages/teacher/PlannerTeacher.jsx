@@ -17,6 +17,7 @@ const PlannerTeacher = () => {
     const [showModal, setShowModal] = useState(false);
     const [groupCompatiblePlanners, setGroupCompatiblePlanners] = useState([]);
     const [showGroupModal, setShowGroupModal] = useState(false);
+    
 
     const rowsPerPage = 5;
     const { courseId: assignmentId } = useParams();
