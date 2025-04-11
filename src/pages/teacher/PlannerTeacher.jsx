@@ -127,15 +127,7 @@ const PlannerTeacher = () => {
     };
 
     const handleSaveEditRow = async () => {
-        if (!editingRowData.every(cell => cell.trim() !== '')) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Campos vacíos',
-                text: 'Por favor completa todos los campos antes de guardar.',
-            });
-            return;
-        }
-
+   
         const confirm = await Swal.fire({
             title: '¿Guardar cambios?',
             icon: 'question',
