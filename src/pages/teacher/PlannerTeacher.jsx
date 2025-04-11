@@ -64,14 +64,7 @@ const PlannerTeacher = () => {
     };
 
     const handleSaveNewRow = async () => {
-        if (!newRow.every(value => value.trim() !== '')) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Campos vacíos',
-                text: 'Por favor completa todos los campos antes de guardar.',
-            });
-            return;
-        }
+
 
         const confirm = await Swal.fire({
             title: '¿Guardar planeación?',
@@ -241,6 +234,7 @@ const PlannerTeacher = () => {
     const handleLoadFromPreviousSemester = async () => {
         try {
             const response = await Axios.get(`planner/compatible/old?plannerId=${assignmentId}`);
+
             console.log("Response from previous semester:", response.data); // Debug
             setCompatiblePlanners(response.data); // Asumiendo que es un array de objetos con los campos necesarios
             setShowModal(true);
@@ -268,6 +262,13 @@ const PlannerTeacher = () => {
                 title: 'Error',
                 text: 'No se pudieron obtener las planeaciones compatibles de otros grupos.',
             });
+        }
+    };
+
+    const autoResizeTextarea = (textarea) => {
+        if (textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = `${textarea.scrollHeight}px`;
         }
     };
     return (
@@ -306,11 +307,16 @@ const PlannerTeacher = () => {
                             <tr className="border-t bg-yellow-50 text-xs md:text-sm">
                                 {newRow.map((cell, index) => (
                                     <td key={index} className="px-3 py-2 text-center">
-                                        <input
-                                            type="text"
+                                        <textarea
                                             value={cell}
                                             onChange={(e) => handleChangeCell(index, e.target.value)}
-                                            className="w-full border border-gray-300 px-2 py-1 rounded"
+                                            rows={1}
+                                            className="w-full border border-gray-300 px-2 py-1 rounded resize-none overflow-hidden"
+                                            style={{ height: 'auto' }}
+                                            onInput={(e) => {
+                                                e.target.style.height = 'auto';
+                                                e.target.style.height = `${e.target.scrollHeight}px`;
+                                            }}
                                             disabled={saving}
                                         />
                                     </td>
@@ -353,13 +359,16 @@ const PlannerTeacher = () => {
                                         {(isEditing ? editingRowData : row).map((cell, cellIndex) => (
                                             <td key={cellIndex} className="px-3 py-2 text-center">
                                                 {isEditing ? (
-                                                    <input
-                                                        type="text"
+                                                    <textarea
+                                                        ref={(el) => autoResizeTextarea(el)}
                                                         value={cell}
                                                         onChange={(e) => handleChangeEditCell(cellIndex, e.target.value)}
-                                                        className="w-full border border-gray-300 px-2 py-1 rounded"
+                                                        rows={1}
+                                                        className="w-full border border-gray-300 px-2 py-1 rounded resize-none overflow-hidden"
+                                                        onInput={(e) => autoResizeTextarea(e.target)}
                                                         disabled={saving}
                                                     />
+
                                                 ) : (
                                                     cell || '-'
                                                 )}
@@ -452,7 +461,7 @@ const PlannerTeacher = () => {
                         <div className="max-h-64 overflow-y-auto">
                             {compatiblePlanners.length > 0 ? (
                                 <ul className="space-y-2">
-                                    {compatiblePlanners.map((plannerItem, idx) => (
+                                    {compatiblePlanners.map((plannerItem) => (
                                         <li
                                             key={plannerItem.id}
                                             className="border p-3 rounded-md hover:bg-gray-100 cursor-pointer transition"
@@ -469,10 +478,25 @@ const PlannerTeacher = () => {
                                                 if (!confirm.isConfirmed) return;
 
                                                 try {
-                                                    const response = await Axios.get(`planner?versionId=${plannerItem.versionId}`);
-                                                    localStorage.setItem('plannerData', JSON.stringify(response.data));
-                                                    setPlanner(response.data);
+                                                    // Obtener la planeación original
+                                                    const response = await Axios.get(`planner?assignmentId=${plannerItem.planningId}`);
+
+                                                    console.log("Response de la planeación seleccionada:", response.data); // Debug
+                                                    // Enviar al endpoint batch
+                                                    const batchPayload = {
+                                                        plannerId: assignmentId, // Usa el ID del planner activo donde se debe insertar
+                                                        batchData: response.data.data.map(row => Object.values(row)), // Asegúrate de estructurar correctamente los datos
+                                                    };
+
+                                                    await Axios.post('planner/batch', batchPayload);
+
+                                                    //actualizar el planner activo
+                                                    const updatedResponse = await Axios.get(`planner?assignmentId=${assignmentId}`);
+                                                    setPlanner(updatedResponse.data);
                                                     setShowModal(false);
+
+
+
                                                     Swal.fire({
                                                         icon: 'success',
                                                         title: 'Cargado',
@@ -490,14 +514,12 @@ const PlannerTeacher = () => {
                                                 }
                                             }}
                                         >
-                                            <p><strong>Docente:</strong> {plannerItem.teacherName}</p>
-                                            <p><strong>Grupo:</strong> {plannerItem.group}</p>
-                                            <p><strong>Semestre:</strong> {plannerItem.semester}</p>
+                                            <strong>{plannerItem.teacherName}</strong> — Grupo: {plannerItem.group}, Semestre: {plannerItem.semester}
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-gray-500 text-center">No hay planeaciones disponibles.</p>
+                                <p className="text-gray-500">No hay planeaciones compatibles.</p>
                             )}
                         </div>
                         <div className="mt-4 text-right">
@@ -535,9 +557,19 @@ const PlannerTeacher = () => {
                                             if (!confirm.isConfirmed) return;
 
                                             try {
-                                                const result = await Axios.get(`planner?plannerId=${groupItem.plannerId}`);
-                                                localStorage.setItem('plannerData', JSON.stringify(result.data));
-                                                setPlanner(result.data);
+                                                const response = await Axios.get(`planner?assignmentId=${groupItem.planningId}`);
+                                                // Enviar al endpoint batch
+                                                const batchPayload = {
+                                                    plannerId: assignmentId, // Usa el ID del planner activo donde se debe insertar
+                                                    batchData: response.data.data.map(row => Object.values(row)), // Asegúrate de estructurar correctamente los datos
+                                                };
+
+                                                await Axios.post('planner/batch', batchPayload);
+
+                                                //actualizar el planner activo
+                                                const updatedResponse = await Axios.get(`planner?assignmentId=${assignmentId}`);
+                                                setPlanner(updatedResponse.data);
+                                                setShowModal(false);
                                                 setShowGroupModal(false);
                                                 Swal.fire({
                                                     icon: 'success',

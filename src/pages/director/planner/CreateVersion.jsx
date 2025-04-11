@@ -301,37 +301,48 @@ const CreateVersion = () => {
             </div>
 
             {showVersionList && (
-                <div className="overflow-x-auto mt-6 border rounded shadow">
-                    <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-                        <thead className="bg-gray-200 text-gray-800">
-                            <tr>
-                                <th className="px-4 py-3 text-left">Nombre de la Versión</th>
-                                <th className="px-4 py-3 text-left" title="Nombre de columnas">Columnas</th>
-                                <th className="px-4 py-3 text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Array.isArray(availableVersions) && availableVersions.map((version) => (
-                                <tr key={version.id} className="border-t hover:bg-gray-100">
-                                    <td className="px-4 py-3">{version.versionName}</td>
-                                    <td
-                                        className="px-4 py-3 text-gray-500 text-sm truncate max-w-xs"
-                                        title={version.versionColumns}
-                                    >
-                                        {version.versionColumns?.slice(0, 60)}...
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <button
-                                            onClick={() => handleSelectVersion(version.id)}
-                                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-all"
-                                        >
-                                            Cargar
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-2">
+                    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
+                        <div className="overflow-x-auto">
+                        <label className="block mb-2 font-medium">Selecciona una version anterior:</label>
+                            <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm text-sm sm:text-base">
+                                <thead className="bg-gray-200 text-gray-800">
+                                    <tr>
+                                        <th className="px-4 py-3 text-center whitespace-nowrap">Nombre de la Versión</th>
+                                        <th className="px-4 py-3 text-center whitespace-nowrap" title="Nombre de columnas">Columnas</th>
+                                        <th className="px-4 py-3 text-center whitespace-nowrap">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Array.isArray(availableVersions) && availableVersions.map((version) => (
+                                        <tr key={version.id} className="border-t hover:bg-gray-100">
+                                            <td className="px-4 py-3">{version.versionName}</td>
+                                            <td
+                                                className="px-4 py-3 text-gray-500 text-sm truncate max-w-xs"
+                                                title={version.versionColumns}
+                                            >
+                                                {version.versionColumns?.slice(0, 60)}...
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <button
+                                                    onClick={() => handleSelectVersion(version.id)}
+                                                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-all text-sm"
+                                                >
+                                                    Cargar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <button
+                                onClick={() => setShowVersionList(false)}
+                                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
             {showVersionModal && (
@@ -344,7 +355,7 @@ const CreateVersion = () => {
                             className="w-full p-2 border rounded mb-4"
                             value={versionName}
                             onChange={(e) => setVersionName(e.target.value)}
-                            placeholder="Ej. Planeador Abril 2025"
+                            placeholder="Ej. 2025 I"
                         />
 
                         <div className="flex items-center mb-4">
