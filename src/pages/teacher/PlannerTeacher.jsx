@@ -17,7 +17,7 @@ const PlannerTeacher = () => {
     const [showModal, setShowModal] = useState(false);
     const [groupCompatiblePlanners, setGroupCompatiblePlanners] = useState([]);
     const [showGroupModal, setShowGroupModal] = useState(false);
-    
+
 
     const rowsPerPage = 5;
     const { courseId: assignmentId } = useParams();
@@ -127,7 +127,7 @@ const PlannerTeacher = () => {
     };
 
     const handleSaveEditRow = async () => {
-   
+
         const confirm = await Swal.fire({
             title: '¿Guardar cambios?',
             icon: 'question',
@@ -461,7 +461,7 @@ const PlannerTeacher = () => {
                                             onClick={async () => {
                                                 const confirm = await Swal.fire({
                                                     title: '¿Cargar esta planeación?',
-                                                    text: `Docente: ${plannerItem.teacherName} | Grupo: ${plannerItem.group} | Semestre: ${plannerItem.semester}`,
+                                                    text: `Docente: ${plannerItem.teacherName} | Grupo: ${plannerItem.group} | Semestre: ${plannerItem.semesterName}`,
                                                     icon: 'question',
                                                     showCancelButton: true,
                                                     confirmButtonText: 'Sí, cargar',
@@ -507,7 +507,7 @@ const PlannerTeacher = () => {
                                                 }
                                             }}
                                         >
-                                            <strong>{plannerItem.teacherName}</strong> — Grupo: {plannerItem.group}, Semestre: {plannerItem.semester}
+                                            <strong>{plannerItem.teacherName}</strong> — Grupo: {plannerItem.group}, Semestre: {plannerItem.semesterName}
                                         </li>
                                     ))}
                                 </ul>
