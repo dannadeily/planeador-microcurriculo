@@ -188,6 +188,13 @@ const CreateVersion = () => {
         setShowVersionModal(true);
     };
 
+    useEffect(() => {
+        const totalPages = Math.ceil(planner.length / plannerPerPage);
+        if (currentPage > totalPages) {
+            setCurrentPage(Math.max(totalPages, 1));
+        }
+    }, [planner, currentPage, plannerPerPage]);
+
     const indexOfLastItem = currentPage * plannerPerPage;
     const indexOfFirstItem = indexOfLastItem - plannerPerPage;
     const currentItems = planner.slice(indexOfFirstItem, indexOfLastItem);
@@ -304,7 +311,7 @@ const CreateVersion = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-2">
                     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
                         <div className="overflow-x-auto">
-                        <label className="block mb-2 font-medium">Selecciona una version anterior:</label>
+                            <label className="block mb-2 font-medium">Selecciona una version anterior:</label>
                             <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm text-sm sm:text-base">
                                 <thead className="bg-gray-200 text-gray-800">
                                     <tr>
