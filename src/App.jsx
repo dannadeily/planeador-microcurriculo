@@ -40,6 +40,9 @@ import Footer from './components/footer/Footer'
 
 // Para director y profesor
 import UpdatePassword from './pages/user/UpdatePassword'
+import EmailPassword from './pages/EmailPassword'
+import RecoverPassword from './pages/RecoverPassword'
+
 
 // no se encontró
 import NotFoundDirector from './components/notFound/NotFoundDirector'
@@ -58,6 +61,8 @@ function App() {
             {/* Rutas de la página principal */}
             <Route path="/" element={<Header />}>
               <Route index element={<Login />} />
+              <Route path="recover-password" element={<RecoverPassword />} />
+              <Route path="email-password" element={<EmailPassword />} />
             </Route>
 
             {/* Rutas del director */}

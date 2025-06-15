@@ -28,9 +28,18 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (user.institutionalEmail.trim() === "" || user.password.trim() === "") {
-            setErrorAlert({ error: true, message: "Todos los campos son obligatorios" });
-            setTimeout(() => setErrorAlert({ error: false, message: "" }), 5000);
+        if (
+            user.institutionalEmail.trim() === "" ||
+            user.password.trim() === ""
+        ) {
+            setErrorAlert({
+                error: true,
+                message: "Todos los campos son obligatorios",
+            });
+            setTimeout(
+                () => setErrorAlert({ error: false, message: "" }),
+                5000
+            );
             return;
         }
 
@@ -62,28 +71,34 @@ const Login = () => {
             if (error.response && error.response.data) {
                 setErrorAlert({ error: true, message: error.response.data });
             }
-            setTimeout(() => setErrorAlert({ error: false, message: "" }), 10000);
+            setTimeout(
+                () => setErrorAlert({ error: false, message: "" }),
+                10000
+            );
         }
     };
 
     return (
         <>
-            
             <div className="xl:mx-96 lg:mx-60 md:mx-40 sm:mx-20 my-10 bg-white shadow rounded-lg p-10 border-2 border-red-700 shadow-lg shadow-red-400">
                 <form onSubmit={handleSubmit}>
-                    
                     <div className="flex flex-col items-center justify-center">
-                <h4 className=" font-medium text-center ">
-                    Bienvenido al Sistema de Planeador de Actividades
-                </h4>
-                <h1 className="text-lg font-bold text-center text-gray-900 dark:text-red-500 mt-4">
-                        INICIAR SESIÓN
-                    </h1>
-            </div>
-                    {errorAlert.error && <ErrorAlert message={errorAlert.message} />}
+                        <h4 className=" font-medium text-center ">
+                            Bienvenido al Sistema de Planeador de Actividades
+                        </h4>
+                        <h1 className="text-lg font-bold text-center text-gray-900 dark:text-red-500 mt-4">
+                            INICIAR SESIÓN
+                        </h1>
+                    </div>
+                    {errorAlert.error && (
+                        <ErrorAlert message={errorAlert.message} />
+                    )}
 
                     <div className="my-5">
-                        <label className="uppercase text-gray-600 block font-bold" htmlFor="institutionalEmail">
+                        <label
+                            className="uppercase text-gray-600 block font-bold"
+                            htmlFor="institutionalEmail"
+                        >
                             Correo Institucional
                         </label>
                         <input
@@ -98,7 +113,10 @@ const Login = () => {
                     </div>
 
                     <div className="my-5 relative">
-                        <label className="uppercase text-gray-600 block font-bold" htmlFor="password">
+                        <label
+                            className="uppercase text-gray-600 block font-bold"
+                            htmlFor="password"
+                        >
                             Contraseña
                         </label>
                         <div className="relative">
@@ -116,7 +134,11 @@ const Login = () => {
                                 className="absolute inset-y-0 right-0 flex items-center px-3"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <IoEyeSharp className="w-5 h-5" />}
+                                {showPassword ? (
+                                    <FaEyeSlash className="w-5 h-5" />
+                                ) : (
+                                    <IoEyeSharp className="w-5 h-5" />
+                                )}
                             </button>
                         </div>
                     </div>
@@ -126,6 +148,12 @@ const Login = () => {
                         value="Iniciar Sesión"
                         className="bg-red-500 mb-5 w-full py-2 text-white uppercase font-bold rounded hover:cursor-pointer hover:bg-red-800 transition-colors"
                     />
+                    <a
+                        href="/email-password"
+                        className="text-red-500 hover:text-red-800 transition-colors"
+                    >
+                        ¿Olvidaste tu contraseña?
+                    </a>
                 </form>
             </div>
         </>
